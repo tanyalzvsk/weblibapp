@@ -1,0 +1,33 @@
+.fakeMenu {
+  width: 80px;
+  height: calc(100dvh - 100px);
+}
+
+.menu {
+  display: block;
+  top: 20px;
+  position: fixed;
+  width: 80px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: rgba(85, 79, 107, 0.4);
+  border-radius: 25px;
+  height: calc(100dvh - 100px);
+  transition: 0.1s all;
+  z-index: 5;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+}
+
+.menu:hover {
+  width: 340px;
+  transition: cubic-bezier(0.445, 0.05, 0.55, 0.95) 0.5s all;
+}
+
+.menuItemsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

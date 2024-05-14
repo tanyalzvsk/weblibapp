@@ -1,0 +1,16 @@
+.search {
+  width: 100%;
+  padding: 23px 20px;
+  position: relative;
+  display: flex;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.70);
+}
+
+.searchIcon {
+  width: 36px;
+  height: 36px;
+}
+
+.searchInput {
+}

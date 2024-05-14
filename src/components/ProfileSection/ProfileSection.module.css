@@ -1,0 +1,41 @@
+.section {
+  display: flex;
+  gap: 30px;
+}
+
+.title {
+  color: white;
+  font-size: 40px;
+  font-weight: 700;
+}
+
+.avatarWrapper {
+  position: relative;
+  width: 186px;
+  height: 186px;
+  background-color: white;
+  border-radius: 25px;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+}
+
+.friendButton {
+  border-radius: 25px;
+  background-color: rgb(43, 19, 19, 0.7);
+  border: none;
+  padding: 10px;
+  width: 160px;
+  max-height: 44;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  
+}

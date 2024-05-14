@@ -1,0 +1,51 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 25px;
+}
+
+.title {
+  color: white;
+  font-size: 60px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: white;
+  font-size: 20px;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.rating {
+  color: white;
+  font-size: 60px;
+  font-weight: 700;
+}
+
+.rate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.annotation {
+  color: white;
+  font-size: 16px;
+  font-weight: 400;
+  font-style: italic;
+}

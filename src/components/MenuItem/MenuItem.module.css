@@ -1,0 +1,34 @@
+.menuItemWrapper {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  border-radius: 25px 15px 15px 25px;
+  transition: 0.3s;
+}
+
+.menuItemWrapper:hover {
+  cursor: pointer;
+  background-color: rgba(16, 13, 11, 0.5);
+}
+
+.iconWrapper {
+  padding: 12px;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.menuItemIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.menuItemName {
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  white-space: nowrap;
+}

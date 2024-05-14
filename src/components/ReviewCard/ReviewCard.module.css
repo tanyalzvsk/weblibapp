@@ -1,0 +1,51 @@
+.card {
+  padding: 20px;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-radius: 25px;
+  background-color: rgba(43, 19, 19, 0.8);
+  transition: 0.3s;
+}
+.card {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+.card::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+.card:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.title {
+  font-size: 20px;
+  color: white;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: white;
+}
+
+.rating {
+  font-size: 36px;
+  color: white;
+  font-weight: 700;
+}
+
+.description {
+  font-size: 12px;
+  color: white;
+}

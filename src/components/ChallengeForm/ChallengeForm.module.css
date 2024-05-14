@@ -1,0 +1,77 @@
+.challenge {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(43, 19, 19, 0.8);
+  border-radius: 25px;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.formTitle {
+  width: 90%;
+  background-color: rgb(43, 19, 19, 0.8);
+  border-radius: 25px;
+  text-align: center;
+}
+
+.bookNumber {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-radius: 25px;
+  background-color: rgb(255, 255, 255, 0.8);
+}
+.titleOfForm {
+  padding: 20px;
+}
+.formHeaders {
+  font-size: 32px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.formInfo {
+  display: flex;
+  gap: 20px;
+}
+
+.numberInput {
+  background-color: rgb(255, 255, 255, 0.8);
+  border-radius: 25px;
+  border: none;
+  outline: none;
+  padding: 5px;
+  height: 35px;
+  width: 290px;
+  margin-top: 25px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  align-items: center;
+}
+.challengeForm {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.challengeSendButton {
+  border-radius: 25px;
+  background-color: #dda3c899;
+  border: 1px solid rgb(43, 19, 19, 0.7);
+  padding: 10px;
+  width: 160px;
+  height: 50px;
+  color: #ffffff;
+  font-weight: 700;
+  border-color: none;
+}
+
+.challengeSendButton:hover {
+  cursor: pointer;
+  background-color: rgb(43, 19, 19, 0.8);
+}

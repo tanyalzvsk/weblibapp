@@ -1,0 +1,92 @@
+.page {
+  display: flex;
+  gap: 34px;
+}
+
+.pageContent {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+
+.pageTitle {
+  color: #fff;
+  font-size: 60px;
+  font-weight: 700;
+}
+
+.formTitle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 95%;
+  height: 80px;
+  background-color: rgb(43, 19, 19, 0.8);
+  border-radius: 25px;
+}
+
+.challenge {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(43, 19, 19, 0.8);
+  border-radius: 25px;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  padding: 20px;
+}
+
+.formHeaders {
+  font-size: 32px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.consistency {
+  font-size: 18px;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.bookInfo {
+  gap: 100px;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 700;
+}
+.infoContainer {
+  display: flex;
+  gap: 70px;
+}
+
+.infoWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+.challengeSendButton {
+  border-radius: 25px;
+  background-color: #dda3c899;
+  border: 1px solid rgb(43, 19, 19, 0.7);
+  padding: 10px;
+  width: 160px;
+  height: 50px;
+  color: #ffffff;
+  font-weight: 700;
+  border-color: none;
+}
+
+.challengeSendButton:hover {
+  cursor: pointer;
+  background-color: rgb(43, 19, 19, 0.8);
+}
+
+.friendChallenge {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}

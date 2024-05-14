@@ -1,0 +1,93 @@
+.page {
+  display: flex;
+  gap: 34px;
+}
+
+.pageContent {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.mainContent {
+  display: flex;
+  gap: 45px 50px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  color: #fff;
+  font-size: 60px;
+  font-weight: 700;
+}
+
+.tabsWrapper {
+  padding: 10px 20px;
+  display: flex;
+  gap: 20px;
+  border-radius: 25px;
+  overflow: scroll;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.tab {
+  padding: 16px 18px;
+  border-radius: 25px;
+  background: rgba(89, 98, 117, 0.8);
+  transition: 0.3s;
+}
+
+.tab:hover {
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.tab.selected {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.tabTitle {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.quote {
+  padding: 20px;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  border-radius: 25px;
+  background-color: rgb(31, 27, 27);
+  transition: 0.3s;
+}
+
+.title {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  max-width: 600px;
+}
+.description {
+  color: #fff;
+  font-size: 12px;
+}
+
+.modal {
+  position: relative;
+  max-width: 80%;
+  top: 50%;
+  left: 158px;
+  transform: translate(0%, -50%);
+  right: auto;
+  bottom: auto;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0px;
+  background-color: rgba(0, 0, 0, 0.895);
+}

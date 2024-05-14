@@ -1,0 +1,83 @@
+.review {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(43, 19, 19, 0.8);
+  border-radius: 25px;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+
+  padding: 20px;
+}
+
+.formTitle {
+  width: 90%;
+  background-color: rgb(43, 19, 19, 0.8);
+  border-radius: 25px;
+  text-align: center;
+}
+
+.reviewInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.reviewTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.titleOfForm {
+  padding: 20px;
+}
+.formHeaders {
+  font-size: 32px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.formInfo {
+  display: flex;
+  gap: 20px;
+}
+
+.titleInput,
+.reviewInput {
+  background-color: rgb(255, 255, 255, 0.8);
+  border-radius: 25px;
+  border: none;
+  outline: none;
+  padding: 15px;
+}
+
+.titleInput {
+  width: 90%;
+  height: 30px;
+}
+
+.reviewInput {
+  height: 225px;
+  width: 550px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.reviewPostButton {
+  border-radius: 25px;
+  background-color: rgb(50, 140, 119);
+  border: 1px solid rgb(43, 19, 19, 0.7);
+  padding: 10px;
+  width: 160px;
+  height: 50px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.reviewPostButton:hover {
+  cursor: pointer;
+}
