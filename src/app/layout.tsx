@@ -1,3 +1,4 @@
+import { UserProvider } from "@/utils";
 import "./globals.css";
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
@@ -19,7 +20,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <NextTopLoader />
-        <div>{children}</div>
+
+        <UserProvider>
+          <div>{children}</div>
+        </UserProvider>
         <ToastContainer />
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use client";
 
 import { PageWrapper } from "@/components";
-import { useCallback, useEffect } from "react";
+import { useCallback, useContext, useEffect } from "react";
 
 import style from "./page.module.css";
 
@@ -11,6 +11,7 @@ import { Poppins } from "@/fonts";
 import { useRouter } from "next/navigation";
 import { API_URL, Pages } from "@/constants";
 import { Resolver, SubmitHandler, useForm } from "react-hook-form";
+import { UserContext } from "@/utils";
 
 type LoginValues = {
   login: string;
@@ -34,6 +35,8 @@ const resolver: Resolver<LoginValues> = async (values) => {
 export default function Login() {
   const router = useRouter();
 
+  const { updateUserId } = useContext(UserContext)!;
+
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -42,9 +45,10 @@ export default function Login() {
     const item = window.localStorage.getItem("user_id");
 
     if (item !== null) {
+      updateUserId(+item);
       router.replace(Pages.main);
     }
-  }, [router]);
+  }, [router, updateUserId]);
 
   const { handleSubmit, register, formState } = useForm<LoginValues>({
     resolver,
@@ -73,16 +77,16 @@ export default function Login() {
 
       console.log("login data", data);
 
-      if (
-        data.success &&
-        data.userId !== undefined &&
-        typeof window !== "undefined"
-      ) {
-        window.localStorage.setItem("user_id", `${data.userId}`);
+      if (data.success && data.userId !== undefined) {
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("user_id", `${data.userId}`);
+        }
+
+        updateUserId(data.userId);
         router.push(Pages.main);
       }
     },
-    [formState.isValid, router]
+    [formState.isValid, router, updateUserId]
   );
 
   const handleSignup = useCallback(() => {

@@ -9,7 +9,7 @@ import {
   ReviewCard,
   CollectionCard,
 } from "@/components";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 import style from "./page.module.css";
 
@@ -20,7 +20,7 @@ import { Poppins } from "@/fonts";
 import { API_URL, API_USER_ID, enabledFilters, filtersType } from "@/constants";
 import { IBook, ICollection, IReview, IUser } from "@/types";
 import { FriendCard } from "@/components/FriendCard";
-import { useAuthCheck } from "@/utils";
+import { UserContext, useAuthCheck } from "@/utils";
 import { getMonthName } from "@/utils";
 import { useRouter } from "next/navigation";
 
@@ -45,24 +45,17 @@ export default function Me() {
     avatarUrl: "",
   });
   const router = useRouter();
-
-  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const item = window ? window.localStorage.getItem("user_id") : null;
-      setCurrentUserId(item ? item : API_USER_ID);
-    }
-  }, []);
+  const { currentUserId } = useContext(UserContext)!;
 
   useAuthCheck(router);
 
-  const loadMe = useCallback(async () => {
+  const loadMe = useCallback(async (id: number) => {
     const meResponse = await fetch(`${API_URL}/user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(`${currentUserId}`),
+      body: JSON.stringify(`${id}`),
     });
 
     const meData: Me = await meResponse.json();
@@ -78,31 +71,15 @@ export default function Me() {
     });
   };
 
-  // const loadBooks = useCallback(async () => {
-  //   const booksResponse = await fetch(`${API_URL}/get_user_books`, {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify(`${currentUserId}`),
-  //   });
-
-  //   const booksData: IBook[] = await booksResponse.json();
-
-  //   console.log("data", booksData);
-
-  //   setBooks(booksData);
-  // }, []);
-
   const loadBooksByStatus = useCallback(
-    async (status: BookStatus) => {
+    async (status: BookStatus, id: number) => {
       const booksResponse = await fetch(`${API_URL}/get_user_books_by_status`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: currentUserId,
+          user_id: id,
           status: convertBookStatusToBd(status),
         }),
       });
@@ -113,17 +90,17 @@ export default function Me() {
 
       setBooks(booksData);
     },
-    [currentUserId]
+    []
   );
 
-  const loadUserReviews = useCallback(async () => {
+  const loadUserReviews = useCallback(async (id: number) => {
     const userReviewsResponse = await fetch(`${API_URL}/reviews_owner`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: currentUserId,
+        user_id: id,
       }),
     });
 
@@ -135,16 +112,16 @@ export default function Me() {
     if (reviewData.success) {
       setReviews(reviewData.reviews);
     }
-  }, [currentUserId]);
+  }, []);
 
-  const loadFriendsData = useCallback(async () => {
+  const loadFriendsData = useCallback(async (id: number) => {
     const friendsResponse = await fetch(`${API_URL}/friends`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: currentUserId,
+        user_id: id,
       }),
     });
 
@@ -155,144 +132,168 @@ export default function Me() {
 
     if (friendsData.success && friendsData.friendsList) {
       const filteredFriends = friendsData.friendsList.filter(
-        (friend) => friend.id !== currentUserId
+        (friend) => friend.id !== id
       );
 
       setFriends(filteredFriends);
     }
-  }, [currentUserId]);
+  }, []);
 
-  const loadCollectionsData = useCallback(async () => {
-    //change USER id to user RN
-    const collectionsResponse = await fetch(`${API_URL}/all_user_collections`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: currentUserId,
-      }),
-    });
+  const loadCollectionsData = useCallback(
+    async (id: number) => {
+      //change USER id to user RN
+      const collectionsResponse = await fetch(
+        `${API_URL}/all_user_collections`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: id,
+          }),
+        }
+      );
 
-    const collectionsData: { collections: ICollection[] } =
-      await collectionsResponse.json();
+      const collectionsData: { collections: ICollection[] } =
+        await collectionsResponse.json();
 
-    const userColls = collectionsData.collections.filter(
-      (collection) => collection.author === me.name
-    );
+      const userColls = collectionsData.collections.filter(
+        (collection) => collection.author === me.name
+      );
 
-    console.log("collections", userColls);
+      console.log("collections", userColls);
 
-    setCollections(userColls);
-  }, [me.name, currentUserId]);
+      setCollections(userColls);
+    },
+    [me.name]
+  );
 
-  const loadReadBooks = useCallback(async () => {
-    if (isLoading) return;
+  const loadReadBooks = useCallback(
+    async (id: number) => {
+      if (isLoading) return;
 
-    setIsLoading(true);
-    try {
-      await loadBooksByStatus("read");
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isLoading, loadBooksByStatus]);
+      setIsLoading(true);
+      try {
+        await loadBooksByStatus("read", id);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, loadBooksByStatus]
+  );
 
-  const loadCompleteBooks = useCallback(async () => {
-    if (isLoading) return;
+  const loadCompleteBooks = useCallback(
+    async (id: number) => {
+      if (isLoading) return;
 
-    setIsLoading(true);
-    try {
-      await loadBooksByStatus("complete");
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isLoading, loadBooksByStatus]);
+      setIsLoading(true);
+      try {
+        await loadBooksByStatus("complete", id);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, loadBooksByStatus]
+  );
 
-  const loadReadingBooks = useCallback(async () => {
-    if (isLoading) return;
+  const loadReadingBooks = useCallback(
+    async (id: number) => {
+      if (isLoading) return;
 
-    setIsLoading(true);
-    try {
-      await loadBooksByStatus("reading");
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isLoading, loadBooksByStatus]);
+      setIsLoading(true);
+      try {
+        await loadBooksByStatus("reading", id);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, loadBooksByStatus]
+  );
 
-  const loadReviews = useCallback(async () => {
-    if (isLoading) return;
+  const loadReviews = useCallback(
+    async (id: number) => {
+      if (isLoading) return;
 
-    setIsLoading(true);
-    try {
-      await loadUserReviews();
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isLoading, loadUserReviews]);
+      setIsLoading(true);
+      try {
+        await loadUserReviews(id);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, loadUserReviews]
+  );
 
-  const loadFriends = useCallback(async () => {
-    if (isLoading) return;
+  const loadFriends = useCallback(
+    async (id: number) => {
+      if (isLoading) return;
 
-    setIsLoading(true);
-    try {
-      await loadFriendsData();
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isLoading, loadFriendsData]);
+      setIsLoading(true);
+      try {
+        await loadFriendsData(id);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, loadFriendsData]
+  );
 
-  const loadCollectios = useCallback(async () => {
-    if (isLoading) return;
+  const loadCollectios = useCallback(
+    async (id: number) => {
+      if (isLoading) return;
 
-    setIsLoading(true);
-    try {
-      await loadCollectionsData();
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isLoading, loadCollectionsData]);
+      setIsLoading(true);
+      try {
+        await loadCollectionsData(id);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, loadCollectionsData]
+  );
 
   const loadCurrentBooks = useCallback(
     (filter: filtersType) => {
-      if (filter === "read") {
-        loadReadBooks();
+      if (filter === "read" && currentUserId) {
+        loadReadBooks(currentUserId);
         return;
       }
 
-      if (filter === "completed") {
-        loadCompleteBooks();
+      if (filter === "completed" && currentUserId) {
+        loadCompleteBooks(currentUserId);
         return;
       }
 
-      if (filter === "reading") {
-        loadReadingBooks();
+      if (filter === "reading" && currentUserId) {
+        loadReadingBooks(currentUserId);
         return;
       }
 
-      if (filter === "reviews") {
-        loadReviews();
+      if (filter === "reviews" && currentUserId) {
+        loadReviews(currentUserId);
         return;
       }
 
-      if (filter === "collections") {
-        loadCollectios();
+      if (filter === "collections" && currentUserId) {
+        loadCollectios(currentUserId);
         return;
       }
 
-      if (filter === "friends") {
-        loadFriends();
+      if (filter === "friends" && currentUserId) {
+        loadFriends(currentUserId);
         return;
       }
     },
@@ -303,15 +304,19 @@ export default function Me() {
       loadReviews,
       loadCollectios,
       loadFriends,
+      currentUserId,
     ]
   );
 
   useEffect(() => {
+    console.log("id", currentUserId);
     // loadBooks();
-    loadCurrentBooks(filter);
-    loadMe();
+    if (currentUserId) {
+      loadCurrentBooks(filter);
+      loadMe(currentUserId);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentUserId]);
 
   let currentMonth = 0;
 

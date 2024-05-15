@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import style from "./ReviewForm.module.css";
 import { BookRate } from "../BookRate";
 import classNames from "classnames";
@@ -11,6 +11,7 @@ import {
 } from "react-hook-form";
 import { API_URL, API_USER_ID } from "@/constants";
 import { Bounce, toast } from "react-toastify";
+import { UserContext } from "@/utils";
 
 export type Rating = 1 | 2 | 3 | 4 | 5;
 
@@ -52,17 +53,13 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
   const [title, setTitle] = useState("");
   const [rate, setRate] = useState<Rating>(1);
   const [text, setText] = useState("");
-  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const item = window ? window.localStorage.getItem("user_id") : null;
-      setCurrentUserId(item ? item : API_USER_ID);
-    }
-  }, []);
+
+  const { currentUserId } = useContext(UserContext)!;
 
   const handleFormSubmit: SubmitHandler<ReviewFormValues> = useCallback(
     async ({ review, reviewTitle }) => {
       console.log("here");
+      
       if (!formState.isValid) {
         toast("Form is invalid! Check the data", {
           autoClose: 3000,

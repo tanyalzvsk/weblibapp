@@ -28,7 +28,9 @@ export const MenuItem: FC<MenuItemProps> = ({
       sideAction();
     }
 
-    router.replace(`/${link}`);
+    if (link) {
+      router.replace(`/${link}`);
+    }
   }, [link, router, sideAction]);
 
   return (

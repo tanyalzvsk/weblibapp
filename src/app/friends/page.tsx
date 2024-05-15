@@ -9,9 +9,9 @@ import classNames from "classnames";
 import { Poppins } from "@/fonts";
 import { API_URL, API_USER_ID } from "@/constants";
 import { IUser } from "@/types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { FriendCard } from "@/components/FriendCard";
-import { useAuthCheck } from "@/utils";
+import { UserContext, useAuthCheck } from "@/utils";
 import { useRouter } from "next/navigation";
 
 export default function Friends() {
@@ -19,24 +19,18 @@ export default function Friends() {
   const [nonFriends, setNonFriends] = useState<IUser[]>([]);
   const router = useRouter();
 
-  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const item = window ? window.localStorage.getItem("user_id") : null;
-      setCurrentUserId(item ? item : API_USER_ID);
-    }
-  }, []);
+  const { currentUserId } = useContext(UserContext)!;
 
   useAuthCheck(router);
 
-  const loadFriends = useCallback(async () => {
+  const loadFriends = useCallback(async (id: number) => {
     const friendsResponse = await fetch(`${API_URL}/friends`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: currentUserId,
+        user_id: id,
       }),
     });
 
@@ -47,21 +41,21 @@ export default function Friends() {
 
     if (friendsData.success && friendsData.friendsList) {
       const filteredFriends = friendsData.friendsList.filter(
-        (friend) => friend.id !== currentUserId
+        (friend) => friend.id !== id
       );
 
       setFriends(filteredFriends);
     }
-  }, [currentUserId]);
+  }, []);
 
-  const loadNonFriends = useCallback(async () => {
+  const loadNonFriends = useCallback(async (id: number) => {
     const nonFriendsResponse = await fetch(`${API_URL}/non_friends`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: currentUserId,
+        user_id: id,
       }),
     });
 
@@ -72,18 +66,20 @@ export default function Friends() {
 
     if (nonFriendsData.success && nonFriendsData.nonFriendsList) {
       const filteredNonFriends = nonFriendsData.nonFriendsList.filter(
-        (nonFriend) => nonFriend.id !== currentUserId
+        (nonFriend) => nonFriend.id !== id
       );
 
       setNonFriends(filteredNonFriends);
     }
-  }, [currentUserId]);
+  }, []);
 
   useEffect(() => {
-    loadFriends();
-    loadNonFriends();
+   if(currentUserId) {
+    loadFriends(currentUserId);
+    loadNonFriends(currentUserId);
+   } 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentUserId]);
 
   const handleSuccess = useCallback(
     (id: number, stat: "add" | "remove") => {

@@ -15,13 +15,13 @@ import style from "./page.module.css";
 import background from "../../../../public/page-background-main.png";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { API_URL, API_USER_ID, enabledFilters, filtersType } from "@/constants";
 import { IUser, IBook, ICollection, IReview } from "@/types";
 import { useParams, useRouter } from "next/navigation";
 import { ProfileSection } from "@/components/ProfileSection";
 import { FriendCard } from "@/components/FriendCard";
-import { useAuthCheck } from "@/utils";
+import { UserContext, useAuthCheck } from "@/utils";
 import { getMonthName } from "@/utils";
 
 export default function CollectionPage() {
@@ -36,13 +36,7 @@ export default function CollectionPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
 
-  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const item = window ? window.localStorage.getItem("user_id") : null;
-      setCurrentUserId(item ? item : API_USER_ID);
-    }
-  }, []);
+  const { currentUserId } = useContext(UserContext)!;
 
   useAuthCheck(router);
 
@@ -62,27 +56,30 @@ export default function CollectionPage() {
     setUserFriend(userData);
   }, [params.id]);
 
-  const loadIsFriendData = useCallback(async () => {
-    const isFriendResponse = await fetch(`${API_URL}/is_friend`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: currentUserId,
-        friend_id: params.id,
-      }),
-    });
+  const loadIsFriendData = useCallback(
+    async (id: number) => {
+      const isFriendResponse = await fetch(`${API_URL}/is_friend`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: id,
+          friend_id: params.id,
+        }),
+      });
 
-    const isFriendData: { success: boolean; is_friend: boolean } =
-      await isFriendResponse.json();
+      const isFriendData: { success: boolean; is_friend: boolean } =
+        await isFriendResponse.json();
 
-    console.log("is friend", isFriendData.success);
+      console.log("is friend", isFriendData.success);
 
-    if (isFriendData.success) {
-      setIsFriend(isFriendData.is_friend);
-    }
-  }, [params.id, currentUserId]);
+      if (isFriendData.success) {
+        setIsFriend(isFriendData.is_friend);
+      }
+    },
+    [params.id]
+  );
 
   // const loadBooks = useCallback(async () => {
   //   const booksResponse = await fetch(`${API_URL}/get_user_books`, {
@@ -387,11 +384,13 @@ export default function CollectionPage() {
   );
 
   useEffect(() => {
-    loadUserData();
-    loadCurrentBooks(filter);
-    loadIsFriendData();
+    if (currentUserId) {
+      loadUserData();
+      loadCurrentBooks(filter);
+      loadIsFriendData(currentUserId);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentUserId]);
 
   let currentMonth = 0;
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import style from "./ChallengeForm.module.css";
 //import { ChallengeForm } from "../ChallengeForm";
 import classNames from "classnames";
@@ -11,6 +11,7 @@ import {
 } from "react-hook-form";
 import { API_URL, API_USER_ID } from "@/constants";
 import { Bounce, toast } from "react-toastify";
+import { UserContext } from "@/utils";
 
 type ChallengeFormProps = {
   onSuccess: (want: number) => void;
@@ -37,14 +38,7 @@ export const ChallengeForm: React.FC<ChallengeFormProps> = ({ onSuccess }) => {
     resolver: customRes,
   });
   const [amount, setAmount] = useState("");
-
-  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const item = window ? window.localStorage.getItem("user_id") : null;
-      setCurrentUserId(item ? item : API_USER_ID);
-    }
-  }, []);
+  const { currentUserId } = useContext(UserContext)!;
 
   const handleFormSubmit: SubmitHandler<ChallengeFormValues> = useCallback(
     async (state) => {
@@ -56,6 +50,11 @@ export const ChallengeForm: React.FC<ChallengeFormProps> = ({ onSuccess }) => {
           type: "warning",
         });
 
+        return;
+      }
+
+      if (!currentUserId) {
+        toast("No user");
         return;
       }
 

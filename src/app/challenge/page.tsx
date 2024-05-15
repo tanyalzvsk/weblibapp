@@ -8,9 +8,9 @@ import background from "../../../public/page-background-main.png";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
 import ChallengeForm from "@/components/ChallengeForm/ChallengeForm";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { API_URL, API_USER_ID } from "@/constants";
-import { useAuthCheck } from "@/utils";
+import { UserContext, useAuthCheck } from "@/utils";
 import { useRouter } from "next/navigation";
 import { IFriendChallenge } from "@/types";
 
@@ -26,26 +26,20 @@ export default function Challenge() {
   const [isChallengeFormVisible, setIsChallengeFormVisible] =
     useState<boolean>(false);
 
-  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const item = window ? window.localStorage.getItem("user_id") : null;
-      setCurrentUserId(item ? item : API_USER_ID);
-    }
-  }, []);
+  const { currentUserId } = useContext(UserContext)!;
 
   const router = useRouter();
 
   useAuthCheck(router);
 
-  const loadUserChallenge = useCallback(async () => {
+  const loadUserChallenge = useCallback(async (id: number) => {
     const challengeResponse = await fetch(`${API_URL}/book_challenge`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: currentUserId,
+        user_id: id,
       }),
     });
 
@@ -61,40 +55,45 @@ export default function Challenge() {
     if (challengeData.success) {
       setChallenge(challengeData);
     }
-  }, [currentUserId]);
+  }, []);
 
-  const loadFriendsChallenge = useCallback(async () => {
-    const firendsChallengeResponse = await fetch(
-      `${API_URL}/book_challenge/friends`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_id: currentUserId,
-        }),
+  const loadFriendsChallenge = useCallback(
+    async (id: number) => {
+      const firendsChallengeResponse = await fetch(
+        `${API_URL}/book_challenge/friends`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: id,
+          }),
+        }
+      );
+
+      const friendChallengeData: {
+        friend_challenges: IFriendChallenge[];
+        success: boolean;
+      } = await firendsChallengeResponse.json();
+
+      console.log("challengeData", friendChallengeData.success);
+
+      if (friendChallengeData.success) {
+        setFriendsChallengeData(friendChallengeData.friend_challenges);
+        console.log(friendChallengeData);
       }
-    );
-
-    const friendChallengeData: {
-      friend_challenges: IFriendChallenge[];
-      success: boolean;
-    } = await firendsChallengeResponse.json();
-
-    console.log("challengeData", friendChallengeData.success);
-
-    if (friendChallengeData.success) {
-      setFriendsChallengeData(friendChallengeData.friend_challenges);
-      console.log(friendChallengeData);
-    }
-  }, [currentUserId]);
+    },
+    []
+  );
 
   useEffect(() => {
-    loadUserChallenge();
-    loadFriendsChallenge();
+    if (currentUserId) {
+      loadUserChallenge(currentUserId);
+      loadFriendsChallenge(currentUserId);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentUserId]);
 
   return (
     <PageWrapper backgroundSrc={background.src} className={style.page}>

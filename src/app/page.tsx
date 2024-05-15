@@ -12,10 +12,10 @@ import {
 import style from "./page.module.css";
 
 import background from "../../public/page-background-main.png";
-import { API_URL, API_USER_ID, reviews } from "@/constants";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { API_URL, reviews } from "@/constants";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { IBook, ICollection } from "@/types";
-import { useAuthCheck } from "@/utils";
+import { UserContext, useAuthCheck } from "@/utils";
 import { useRouter } from "next/navigation";
 import { ISearchData } from "@/types/SearchData";
 import { FriendCard } from "@/components/FriendCard";
@@ -25,26 +25,20 @@ export default function Home() {
   const [collections, setCollections] = useState<ICollection[]>([]);
   const [searchData, setSearchData] = useState<ISearchData>();
 
-  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const item = window ? window.localStorage.getItem("user_id") : null;
-      setCurrentUserId(item ? item : API_USER_ID);
-    }
-  }, []);
+  const { currentUserId } = useContext(UserContext)!;
 
   const router = useRouter();
 
   useAuthCheck(router);
 
-  const loadCollections = useCallback(async () => {
+  const loadCollections = useCallback(async (id: number) => {
     const collectionsResponse = await fetch(`${API_URL}/all_user_collections`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: currentUserId,
+        user_id: id,
       }),
     });
 
@@ -53,32 +47,39 @@ export default function Home() {
     console.log("collections", collectionsData.collections);
 
     setCollections(collectionsData.collections);
-  }, [currentUserId]);
+  }, []);
 
-  const loadBooks = useCallback(async () => {
-    const booksResponse = await fetch(`${API_URL}/all`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: currentUserId,
-      }),
-    });
+  const loadBooks = useCallback(
+    async (id: number) => {
+      const booksResponse = await fetch(`${API_URL}/all`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: id,
+        }),
+      });
 
-    const booksData: IBook[] = await booksResponse.json();
+      const booksData: IBook[] = await booksResponse.json();
 
-    console.log("data", booksData);
+      console.log("data", booksData);
 
-    setBooks(booksData);
+      setBooks(booksData);
 
-    await loadCollections();
-  }, [currentUserId, loadCollections]);
+      if (currentUserId) {
+        await loadCollections(currentUserId);
+      }
+    },
+    [loadCollections, currentUserId]
+  );
 
   useEffect(() => {
-    loadBooks();
+    if (currentUserId) {
+      loadBooks(currentUserId);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentUserId]);
 
   const isSearch: boolean = useMemo(() => {
     if (searchData && searchData.books.length > 0) {

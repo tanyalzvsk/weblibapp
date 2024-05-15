@@ -9,26 +9,20 @@ import classNames from "classnames";
 import { Poppins } from "@/fonts";
 import { API_URL, API_USER_ID } from "@/constants";
 import { ICollection } from "@/types";
-import { useState, useCallback, useEffect } from "react";
-import { useAuthCheck } from "@/utils";
+import { useState, useCallback, useEffect, useContext } from "react";
+import { UserContext, useAuthCheck } from "@/utils";
 import { useRouter } from "next/navigation";
 
 export default function Collections() {
   const [collections, setCollections] = useState<ICollection[]>([]);
 
-  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const item = window ? window.localStorage.getItem("user_id") : null;
-      setCurrentUserId(item ? item : API_USER_ID);
-    }
-  }, []);
+  const { currentUserId } = useContext(UserContext)!;
 
   const router = useRouter();
 
   useAuthCheck(router);
 
-  const loadCollectionsData = useCallback(async () => {
+  const loadCollectionsData = useCallback(async (id: number) => {
     //change USER id to user RN
     const collectionsResponse = await fetch(`${API_URL}/all_user_collections`, {
       method: "POST",
@@ -36,7 +30,7 @@ export default function Collections() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: currentUserId,
+        user_id: id,
       }),
     });
 
@@ -46,12 +40,14 @@ export default function Collections() {
     console.log("collections", collectionsData.collections);
 
     setCollections(collectionsData.collections);
-  }, [currentUserId]);
+  }, []);
 
   useEffect(() => {
-    loadCollectionsData();
+    if (currentUserId) {
+      loadCollectionsData(currentUserId);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentUserId]);
 
   return (
     <PageWrapper backgroundSrc={background.src} className={style.page}>

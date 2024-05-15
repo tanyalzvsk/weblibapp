@@ -1,13 +1,20 @@
 "use client";
 
-import { ChangeEvent, FC, useCallback, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import style from "./ProfileSection.module.css";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
 import Image from "next/image";
 import { API_URL, BASE_API_URL } from "@/constants";
-import avatarMOCK from "../../../public/avatar.png";
 import { IUser } from "@/types";
+import { UserContext } from "@/utils";
 
 export interface ProfileSectionProps extends IUser {
   name: string;
@@ -20,7 +27,6 @@ export interface ProfileSectionProps extends IUser {
 
 export const ProfileSection: FC<ProfileSectionProps> = ({
   name,
-  id,
   info,
   avatarUrl,
   isFriend,
@@ -39,12 +45,13 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
       setSelectedFile(event.target.files[0]);
     }
   };
+  const { currentUserId } = useContext(UserContext)!;
 
   const handleUpload = async () => {
-    if (selectedFile) {
+    if (selectedFile && currentUserId) {
       const formData = new FormData();
       formData.append("avatar", selectedFile);
-      formData.append("user_id", `${id}`);
+      formData.append("user_id", `${currentUserId}`);
 
       const response = await fetch(`${API_URL}/upload-image`, {
         method: "POST",
@@ -61,35 +68,34 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
     }
   };
 
-  const changeInfo = useCallback(async () => {
-    const changeInfoReq = await fetch(`${API_URL}/changeInfo`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: id,
-        info: newVal,
-      }),
-    });
+  const changeInfo = useCallback(
+    async (id: number) => {
+      const changeInfoReq = await fetch(`${API_URL}/changeInfo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: id,
+          info: newVal,
+        }),
+      });
 
-    const changeInfoData: { success: boolean; info: string } =
-      await changeInfoReq.json();
+      const changeInfoData: { success: boolean; info: string } =
+        await changeInfoReq.json();
 
-    if (changeInfoData.success) {
-      if (onChangeInfo) {
-        onChangeInfo(changeInfoData.info);
-        setIsInfoRed(false);
-        setNewVal(changeInfoData.info);
+      if (changeInfoData.success) {
+        if (onChangeInfo) {
+          onChangeInfo(changeInfoData.info);
+          setIsInfoRed(false);
+          setNewVal(changeInfoData.info);
+        }
       }
-    }
 
-    console.log("change info ", changeInfoData);
-  }, [id, newVal, onChangeInfo]);
-
-  useEffect(() => {
-    console.log("a", avatar);
-  }, [avatar]);
+      console.log("change info ", changeInfoData);
+    },
+    [newVal, onChangeInfo]
+  );
 
   useEffect(() => {
     if (avatarUrl) {
@@ -106,18 +112,12 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
   return (
     <section className={style.section}>
       <div className={style.avatarWrapper}>
-        {avatar ? (
+        {avatar && (
           <Image
             src={`${BASE_API_URL}/avatars/${avatar}`}
             alt={`${name} image`}
             fill
-          />
-        ) : (
-          <Image
-            className={style.avatar}
-            src={avatarMOCK.src}
-            alt="avatar"
-            fill
+            style={{ borderRadius: "16px" }}
           />
         )}
       </div>
@@ -156,11 +156,13 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
               Change
             </button>
           )}
-          
+
           {isInfoRed && (
             <button
               onClick={() => {
-                changeInfo();
+                if (currentUserId) {
+                  changeInfo(currentUserId);
+                }
               }}
             >
               save

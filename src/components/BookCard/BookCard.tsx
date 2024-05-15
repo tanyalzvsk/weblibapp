@@ -1,12 +1,19 @@
 "use client";
 
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import style from "./BookCard.module.css";
 import { IBook } from "@/types";
 import { Poppins } from "@/fonts";
 import classNames from "classnames";
 import { useRouter } from "next/navigation";
-import { generateRandomColor } from "@/utils";
+import { UserContext, generateRandomColor } from "@/utils";
 import Image from "next/image";
 import { API_URL, API_USER_ID, BASE_API_URL } from "@/constants";
 import { useAuthCheck } from "@/utils";
@@ -63,25 +70,19 @@ export const BookCard: FC<BookCardProps> = ({
     return generateRandomColor();
   }, []);
 
-  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const item = window ? window.localStorage.getItem("user_id") : null;
-      setCurrentUserId(item ? item : API_USER_ID);
-    }
-  }, []);
+  const { currentUserId } = useContext(UserContext)!;
 
   useAuthCheck(router);
 
   const changeStatus = useCallback(
-    async (book_id: number, status: BookStatus) => {
+    async (book_id: number, status: BookStatus, id: number) => {
       const bookStatusResponse = await fetch(`${API_URL}/update_status`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: currentUserId,
+          user_id: id,
           book_id,
           status: convertBookStatusToBd(status),
         }),
@@ -96,41 +97,53 @@ export const BookCard: FC<BookCardProps> = ({
         setCurrentStatus(status);
       }
     },
-    [currentUserId]
+    []
   );
 
   const handleBookComplete = useCallback(async () => {
+    if (!currentUserId) {
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await changeStatus(book_id, "complete");
+      await changeStatus(book_id, "complete", currentUserId);
     } catch (error) {
       console.log(error);
     } finally {
       setIsLoading(false);
     }
-  }, [book_id, changeStatus]);
+  }, [book_id, changeStatus, currentUserId]);
 
   const handleBookWillRead = useCallback(async () => {
+    if (!currentUserId) {
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await changeStatus(book_id, "read");
+      await changeStatus(book_id, "read", currentUserId);
     } catch (error) {
       console.log(error);
     } finally {
       setIsLoading(false);
     }
-  }, [book_id, changeStatus]);
+  }, [book_id, changeStatus, currentUserId]);
 
   const handleBookReading = useCallback(async () => {
+    if (!currentUserId) {
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await changeStatus(book_id, "reading");
+      await changeStatus(book_id, "reading", currentUserId);
     } catch (error) {
       console.log(error);
     } finally {
       setIsLoading(false);
     }
-  }, [book_id, changeStatus]);
+  }, [book_id, changeStatus, currentUserId]);
 
   return (
     <div

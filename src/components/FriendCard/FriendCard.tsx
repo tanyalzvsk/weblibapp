@@ -1,13 +1,14 @@
 "use client";
 
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useContext, useEffect, useState } from "react";
 import style from "./FriendCard.module.css";
 import { IUser } from "@/types";
 import { Poppins } from "@/fonts";
 import classNames from "classnames";
 import Image from "next/image";
-import { API_URL, API_USER_ID, BASE_API_URL } from "@/constants";
+import { API_URL, BASE_API_URL } from "@/constants";
 import { useRouter } from "next/navigation";
+import { UserContext } from "@/utils";
 
 export interface FriendCardProps extends IUser {
   isFriend?: boolean;
@@ -28,23 +29,17 @@ export const FriendCard: FC<FriendCardProps> = ({
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const item = window ? window.localStorage.getItem("user_id") : null;
-      setCurrentUserId(item ? item : API_USER_ID);
-    }
-  }, []);
+  const { currentUserId } = useContext(UserContext)!;
 
   const addFriendReq = useCallback(
-    async (friend_id: number) => {
+    async (friend_id: number, id: number) => {
       const addFriendRes = await fetch(`${API_URL}/add_friend`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: currentUserId,
+          user_id: id,
           friend_id,
         }),
       });
@@ -52,23 +47,23 @@ export const FriendCard: FC<FriendCardProps> = ({
       const friendsData: { success: boolean } = await addFriendRes.json();
 
       if (friendsData.success) {
-        onSuccess(friend_id, 'add');
+        onSuccess(friend_id, "add");
       }
 
       console.log("Add Friend? ", friendsData.success);
     },
-    [onSuccess, currentUserId]
+    [onSuccess]
   );
 
   const removeFriendReq = useCallback(
-    async (friend_id: number) => {
+    async (friend_id: number, id: number) => {
       const removeFriendRes = await fetch(`${API_URL}/remove_friend`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: currentUserId,
+          user_id: id,
           friend_id,
         }),
       });
@@ -81,37 +76,42 @@ export const FriendCard: FC<FriendCardProps> = ({
 
       console.log("remove Friend? ", friendsData.success);
     },
-    [onSuccess, currentUserId]
+    [onSuccess]
   );
 
   const addFriend = useCallback(
     async (friend_id: number) => {
+      if (!currentUserId) {
+        return;
+      }
+
       setIsLoading(true);
 
       try {
-        await addFriendReq(friend_id);
+        await addFriendReq(friend_id, currentUserId);
       } catch (error) {
         console.log(error);
       } finally {
         setIsLoading(false);
       }
     },
-    [addFriendReq]
+    [addFriendReq, currentUserId]
   );
 
   const deleteFriend = useCallback(
     async (friend_id: number) => {
+      if (!currentUserId) return;
       setIsLoading(true);
 
       try {
-        await removeFriendReq(friend_id);
+        await removeFriendReq(friend_id, currentUserId);
       } catch (error) {
         console.log(error);
       } finally {
         setIsLoading(false);
       }
     },
-    [removeFriendReq]
+    [removeFriendReq, currentUserId]
   );
 
   const handleUserClick = useCallback(() => {

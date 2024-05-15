@@ -1,11 +1,11 @@
 "use client";
 
-import { FC, Fragment, useState } from "react";
+import { FC, Fragment, useContext, useState } from "react";
 import style from "./Menu.module.css";
 
 import { IMenuItem } from "@/types";
-import { Poppins } from "@/fonts";
 import { MenuItem } from "../MenuItem";
+import Modal from "react-modal";
 
 import heartIcon from "../../../public/heart.svg";
 import swapIcon from "../../../public/swap.svg";
@@ -15,6 +15,8 @@ import stackIcon from "../../../public/stack.svg";
 import settingsIcon from "../../../public/settings.svg";
 import quitIcon from "../../../public/quit.svg";
 import classNames from "classnames";
+import { useRouter } from "next/navigation";
+import { UserContext } from "@/utils";
 
 const menuItems: IMenuItem[] = [
   {
@@ -44,30 +46,40 @@ const menuItems: IMenuItem[] = [
   },
 ];
 
-const buttonMenuItems: IMenuItem[] = [
-  {
-    name: "Settings",
-    link: "settings",
-    imageSrc: settingsIcon.src,
-  },
-  {
-    name: "Quit",
-    link: "/login",
-    imageSrc: quitIcon.src,
-    sideAction: () => {
-      if (typeof window !== "undefined") {
-        window.localStorage.removeItem("user_id");
-      }
-    },
-  },
-];
-
 export interface MenuProps {
   backgroundColor?: string;
 }
 
 export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(true);
+
+  const { updateUserId } = useContext(UserContext)!;
+
+  const [modalIsOpen, setIsModalOpen] = useState(false);
+
+  function openModal() {
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    setIsModalOpen(false);
+  }
+
+  const buttonMenuItems: IMenuItem[] = [
+    {
+      name: "Settings",
+      link: "settings",
+      imageSrc: settingsIcon.src,
+    },
+    {
+      name: "Quit",
+      imageSrc: quitIcon.src,
+      sideAction: () => {
+        openModal();
+      },
+    },
+  ];
 
   return (
     <Fragment>
@@ -101,6 +113,38 @@ export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
           ))}
         </div>
       </div>
+
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        style={{
+          content: {
+            top: "calc(50% - 50px)",
+            left: "calc(50% - 50px)",
+            width: "100px",
+            height: "100px",
+          },
+        }}
+      >
+        <h2>quit?</h2>
+
+        <button
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              window.localStorage.removeItem("user_id");
+            }
+
+            closeModal();
+
+            updateUserId(null);
+
+            router.replace("/login");
+          }}
+        >
+          yes
+        </button>
+        <button onClick={closeModal}>no</button>
+      </Modal>
     </Fragment>
   );
 };
