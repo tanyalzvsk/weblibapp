@@ -1,19 +1,21 @@
 "use client";
 
-import { FC, useCallback, useContext, useEffect, useState } from "react";
+import { FC, useCallback, useContext, useMemo, useEffect, useState } from "react";
 import style from "./FriendCard.module.css";
 import { IUser } from "@/types";
 import { Poppins } from "@/fonts";
 import classNames from "classnames";
 import Image from "next/image";
+import { UserContext, generateRandomColor } from "@/utils";
 import { API_URL, BASE_API_URL } from "@/constants";
 import { useRouter } from "next/navigation";
-import { UserContext } from "@/utils";
+
 
 export interface FriendCardProps extends IUser {
   isFriend?: boolean;
   isMe?: boolean;
   isImmutable?: boolean;
+  backgroundColor?: string;
   onSuccess: (id: number, status?: "remove" | "add") => void;
 }
 
@@ -25,11 +27,15 @@ export const FriendCard: FC<FriendCardProps> = ({
   isFriend = false,
   isImmutable = false,
   isMe = false,
+  backgroundColor = "",
 }) => {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { currentUserId } = useContext(UserContext)!;
+  const bgColor: string = useMemo(() => {
+    return generateRandomColor();
+  }, []);
 
   const addFriendReq = useCallback(
     async (friend_id: number, id: number) => {
@@ -123,6 +129,7 @@ export const FriendCard: FC<FriendCardProps> = ({
       className={classNames(style.card, {
         [style.loading]: isLoading,
       })}
+      style={{ backgroundColor: backgroundColor ? backgroundColor : bgColor }}
       onClick={handleUserClick}
     >
       {avatarUrl ? (

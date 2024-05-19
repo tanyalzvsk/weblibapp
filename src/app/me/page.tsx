@@ -374,7 +374,7 @@ export default function Me() {
                 const month = +book.date.substr(5, 2); // Извлечение месяца из поля date (предполагается формат 'year-month-day')
 
                 // Если текущий месяц отличается от полученного месяца, выводим название месяца
-                if (currentMonth !== month) {
+               if (currentMonth !== month) {
                   currentMonth = month;
                   return (
                     <div key={month} className={style.monthAndBooksContainer}>
@@ -388,12 +388,14 @@ export default function Me() {
                       </h1>
                       <div className={style.booksContainer}>
                         <BookCard key={book.book_id} {...book} />{" "}
+                   
+                        
                       </div>
                     </div>
                   );
                 }
 
-                return <BookCard key={book.book_id} {...book} />;
+               return <BookCard key={book.book_id} {...book} />; 
               })}
 
           {filter === "reviews" &&

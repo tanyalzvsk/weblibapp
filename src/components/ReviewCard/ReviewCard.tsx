@@ -18,7 +18,7 @@ export const ReviewCard: FC<ReviewCardProps> = ({
   name,
   rating,
   description,
-  backgroundColor = " ",
+  backgroundColor = "",
 }) => {
   const bgColor: string = useMemo(() => {
     return generateRandomColor();
