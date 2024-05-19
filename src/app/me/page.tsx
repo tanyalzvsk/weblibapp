@@ -377,11 +377,18 @@ export default function Me() {
                 if (currentMonth !== month) {
                   currentMonth = month;
                   return (
-                    <div key={month}>
-                      <h1 style={{ fontSize: "30px" }}>
+                    <div key={month} className={style.monthAndBooksContainer}>
+                      <h1
+                        className={classNames(
+                          style.monthTitle,
+                          Poppins.className
+                        )}
+                      >
                         {getMonthName(month)}
                       </h1>
-                      <BookCard key={book.book_id} {...book} />
+                      <div className={style.booksContainer}>
+                        <BookCard key={book.book_id} {...book} />{" "}
+                      </div>
                     </div>
                   );
                 }

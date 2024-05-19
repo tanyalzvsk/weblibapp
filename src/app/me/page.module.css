@@ -12,9 +12,9 @@
 
 .mainContent {
   display: flex;
-  gap: 45px 50px;
-  flex-wrap: wrap;
-  justify-content: space-between;
+gap: 20px;
+flex-direction: column;
+  
 }
 
 .tabsWrapper {
@@ -46,4 +46,23 @@
   color: #fff;
   font-size: 18px;
   font-weight: 700;
+}
+
+.monthTitle {
+  color: white;
+  font-size: 30px;
+  font-weight: 700;
+  
+}
+.monthAndBooksContainer {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+gap: 10px;
+  
+}
+
+.booksContainer {
+  display: flex;
+  gap: 16px;
 }
