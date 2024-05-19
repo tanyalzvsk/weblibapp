@@ -31,3 +31,39 @@
   flex-direction: column;
   gap: 12px;
 }
+
+.quitMenu {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20%;
+  background-color: rgb(43, 19, 19, 0.8);
+  border: none;
+  border-radius: 25px;
+}
+
+.quitTitle {
+  color: white;
+  font-size: 26px;
+}
+
+.buttonsWrapper {
+ display: flex;
+ gap: 20px;
+  
+}
+
+.quitButton {
+  border-radius: 25px;
+  background-color: #dda3c899;
+  border: 1px solid #dda3c899;
+  padding: 10px;
+  width: 160px;
+  height: 50px;
+  color: #ffffff;
+  font-weight: 700;
+}

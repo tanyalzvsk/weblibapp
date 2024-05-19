@@ -6,7 +6,7 @@ import style from "./Menu.module.css";
 import { IMenuItem } from "@/types";
 import { MenuItem } from "../MenuItem";
 import Modal from "react-modal";
-
+import { Poppins } from "@/fonts";
 import heartIcon from "../../../public/heart.svg";
 import swapIcon from "../../../public/swap.svg";
 import trophyIcon from "../../../public/trophy.svg";
@@ -115,35 +115,41 @@ export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
       </div>
 
       <Modal
+        className={style.quitMenu}
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
         style={{
           content: {
             top: "calc(50% - 50px)",
             left: "calc(50% - 50px)",
-            width: "100px",
-            height: "100px",
+            width: "400px",
+            height: "200px",
           },
         }}
       >
-        <h2>quit?</h2>
+        <h2 className={classNames(style.quitTitle, Poppins.className)}>
+          Do you want to quit?
+        </h2>
 
-        <button
-          onClick={() => {
-            if (typeof window !== "undefined") {
-              window.localStorage.removeItem("user_id");
-            }
+        <div className={style.buttonsWrapper}>
+          {" "}
+          <button className={classNames(style.quitButton,Poppins.className)}
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.localStorage.removeItem("user_id");
+              }
 
-            closeModal();
+              closeModal();
 
-            updateUserId(null);
+              updateUserId(null);
 
-            router.replace("/login");
-          }}
-        >
-          yes
-        </button>
-        <button onClick={closeModal}>no</button>
+              router.replace("/login");
+            }}
+          >
+            Yes
+          </button>
+          <button className={classNames(style.quitButton, Poppins.className)} onClick={closeModal}>No</button>{" "}
+        </div>
       </Modal>
     </Fragment>
   );
