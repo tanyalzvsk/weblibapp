@@ -1,17 +1,20 @@
 "use client";
 
-import { FC, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import style from "./ReviewCard.module.css";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
 import { IReview } from "@/types";
 import { generateRandomColor } from "@/utils";
+import { useRouter } from "next/navigation";
+import { Pages } from "@/constants";
 
 export interface ReviewCardProps extends IReview {
   backgroundColor?: string;
 }
 
 export const ReviewCard: FC<ReviewCardProps> = ({
+  review_id,
   name,
   rating,
   description,
@@ -21,9 +24,21 @@ export const ReviewCard: FC<ReviewCardProps> = ({
     return generateRandomColor();
   }, []);
 
+  const router = useRouter();
+
+  const handleClick = useCallback(
+    (id: number) => {
+      router.replace(Pages.review + "/" + id);
+    },
+    [router]
+  );
+
   return (
     <div
       className={style.card}
+      onClick={() => {
+        handleClick(review_id);
+      }}
       style={{ backgroundColor: backgroundColor ? backgroundColor : bgColor }}
     >
       <div className={style.info}>

@@ -15,9 +15,14 @@ import { Poppins } from "@/fonts";
 import { API_URL } from "@/constants";
 import { IReview } from "@/types";
 import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthCheck } from "@/utils";
 
 export default function Reviews() {
   const [reviews, setReviews] = useState<IReview[]>([]);
+  const router = useRouter();
+
+  useAuthCheck(router);
 
   const loadAllReviews = useCallback(async () => {
     const userReviewsResponse = await fetch(`${API_URL}/all_reviews`, {

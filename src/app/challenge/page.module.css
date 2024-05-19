@@ -10,6 +10,10 @@
   gap: 60px;
 }
 
+.wrap {
+  display: flex;
+  gap: 10px;
+}
 
 .pageTitle {
   color: #fff;
@@ -38,8 +42,13 @@
   padding: 20px;
 }
 
+.mainContent {
+  width: 100%;
+}
+
 .formHeaders {
   font-size: 32px;
+  padding: 16px;
   color: #ffffff;
   font-weight: 700;
 }
@@ -86,7 +95,46 @@
 }
 
 .friendChallenge {
+  max-width: 250px;
+  width: 100%;
+  padding: 16px;
   display: flex;
+  flex-direction: column;
   gap: 10px;
   align-items: center;
+  background-color: rgb(43, 19, 19, 0.5);
+  border-radius: 25px;
+}
+
+.friendChallengeRating {
+  font-size: 40px;
+  color: white;
+  font-weight: 700;
+}
+
+.friendChallengeWrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 16px;
+  background-color: #dda3c899;
+}
+
+.myFriendChallengeWrap {
+  background-color: rgba(245, 202, 123, 0.7);
+}
+
+.friendChallengeText {
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.friendChallengeTextBold {
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
 }
