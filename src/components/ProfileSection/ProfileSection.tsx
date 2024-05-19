@@ -6,6 +6,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import style from "./ProfileSection.module.css";
@@ -109,6 +110,14 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
     }
   }, [info]);
 
+  const ref = useRef<HTMLInputElement | null>(null);
+
+  const handleChangeAvatar = () => {
+    if (ref.current) {
+      ref.current.click();
+    }
+  };
+
   return (
     <section className={style.section}>
       <div className={style.avatarWrapper}>
@@ -126,15 +135,57 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
         <h3 className={classNames(style.title, Poppins.className)}>{name}</h3>
 
         {isMe && (
-          <div>
-            <input type="file" name="avatar" onChange={handleFileChange} />
+          <div className={style.wrapfile}>
+            <input
+              type="file"
+              name="avatar"
+              onChange={handleFileChange}
+              ref={ref}
+              style={{ display: "none" }}
+            />
 
-            <button onClick={handleUpload}>Upload avatar</button>
+            {selectedFile && !isInfoRed && (
+              <p className={classNames(Poppins.className, style.filename)}>
+                {selectedFile.name}
+              </p>
+            )}
+
+            <div className={style.controlsBtn}>
+              {selectedFile && !isInfoRed && (
+                <button onClick={handleUpload} className={style.btn}>
+                  Upload avatar
+                </button>
+              )}
+
+              {!isInfoRed && (
+                <button onClick={handleChangeAvatar} className={style.btn}>
+                  Change avatar
+                </button>
+              )}
+
+              {selectedFile && !isInfoRed && (
+                <button
+                  onClick={() => {
+                    setSelectedFile(null);
+                  }}
+                  className={style.btn}
+                >
+                  Unselect avatar
+                </button>
+              )}
+            </div>
           </div>
         )}
 
-        <div>
-          {!isInfoRed && <p>{info}</p>}
+        <div className={style.contentWrap}>
+          {!isInfoRed && (
+            <p className={classNames(Poppins.className, style.info)}>
+              <span style={{ fontSize: "20px", fontWeight: "700" }}>
+                Information:
+              </span>{" "}
+              {info}
+            </p>
+          )}
 
           {isInfoRed && (
             <textarea
@@ -142,6 +193,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
               onChange={(e) => {
                 setNewVal(e.target.value);
               }}
+              className={style.textare}
             >
               {newVal}
             </textarea>
@@ -152,30 +204,37 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
               onClick={() => {
                 setIsInfoRed(true);
               }}
+              className={style.btn}
             >
               Change
             </button>
           )}
 
           {isInfoRed && (
-            <button
-              onClick={() => {
-                if (currentUserId) {
-                  changeInfo(currentUserId);
-                }
-              }}
-            >
-              save
-            </button>
-          )}
-          {isInfoRed && (
-            <button
-              onClick={() => {
-                setIsInfoRed(false);
-              }}
-            >
-              cancel
-            </button>
+            <div className={style.redInfo}>
+              <button
+                className={style.btn}
+                onClick={() => {
+                  if (currentUserId) {
+                    changeInfo(currentUserId);
+                  }
+                }}
+              >
+                save
+              </button>
+              <button
+                className={style.btn}
+                onClick={() => {
+                  setIsInfoRed(false);
+
+                  if (typeof info !== "undefined") {
+                    setNewVal(info);
+                  }
+                }}
+              >
+                cancel
+              </button>
+            </div>
           )}
         </div>
 

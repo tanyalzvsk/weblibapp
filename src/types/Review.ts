@@ -3,6 +3,7 @@ export interface IReview {
   name: string;
   description: string;
   rating: number;
+  book_name?: string;
 }
 
 export interface IReviewComment {
