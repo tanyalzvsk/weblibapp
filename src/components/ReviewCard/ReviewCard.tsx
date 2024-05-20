@@ -18,6 +18,7 @@ export const ReviewCard: FC<ReviewCardProps> = ({
   name,
   rating,
   description,
+  book_name = "",
   backgroundColor = "",
 }) => {
   const bgColor: string = useMemo(() => {
@@ -42,12 +43,22 @@ export const ReviewCard: FC<ReviewCardProps> = ({
       style={{ backgroundColor: backgroundColor ? backgroundColor : bgColor }}
     >
       <div className={style.info}>
+        <div className={style.wrap}>
+          {book_name && (
+            <h4 className={classNames(style.title, Poppins.className)}>
+              {book_name}
+            </h4>
+          )}
+
+          <p className={classNames(style.rating, Poppins.className)}>
+            {rating}
+          </p>
+        </div>
+
         <h4 className={classNames(style.title, Poppins.className)}>
           {name}
-          <span className={style.subtitle}> writes:</span>
+          <span className={style.subtitle}> writes: </span>
         </h4>
-
-        <p className={classNames(style.rating, Poppins.className)}>{rating}</p>
       </div>
 
       <p className={classNames(style.description, Poppins.className)}>
