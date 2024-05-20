@@ -1,5 +1,5 @@
 export type filtersType =
-  | "read"
+  | "to read"
   | "reading"
   | "completed"
   | "collections"
@@ -7,7 +7,7 @@ export type filtersType =
   | "friends";
 
 export const enabledFilters: filtersType[] = [
-  "read",
+  "to read",
   "reading",
   "completed",
   "collections",
