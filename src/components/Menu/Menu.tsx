@@ -68,8 +68,8 @@ export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
 
   const buttonMenuItems: IMenuItem[] = [
     {
-      name: "Settings",
-      link: "settings",
+      name: "Back",
+      link: " ",
       imageSrc: settingsIcon.src,
     },
     {
