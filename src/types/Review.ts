@@ -13,6 +13,7 @@ export interface IReviewComment {
   txt: string;
   date: string;
   user_avatar?: string;
+  is_liked?: boolean;
 }
 
 export interface IFullReview {
@@ -22,4 +23,8 @@ export interface IFullReview {
   rate: number;
   txt: string;
   date: string;
+  user_name?: string;
+  book_name?: string;
 }
+
+export type ReviewLikeAction = "add" | "remove";
