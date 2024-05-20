@@ -5,9 +5,12 @@ import Image from "next/image";
 import style from "./Search.module.css";
 
 import searchIcon from "../../../public/search-glass.svg";
+import searchDeleteIcon from "../../../public/search-delete.svg";
 import { API_URL } from "@/constants";
 import { ISearchData } from "@/types/SearchData";
 import { UserContext } from "@/utils";
+import { Poppins } from "@/fonts";
+import classNames from "classnames";
 
 export interface SearchProps {
   handleDateChange: (data: ISearchData) => void;
@@ -46,7 +49,16 @@ export const Search: FC<SearchProps> = ({ handleDateChange }) => {
 
   return (
     <div className={style.search}>
-      <Image className={style.searchIcon} src={searchIcon} alt="search" />
+       <button className={classNames(style.searchButton, Poppins.className)}
+        onClick={() => {
+          if (currentUserId) {
+            handleSearch(currentUserId);
+          }
+        }}
+      >
+        <Image className={style.searchIcon} src={searchIcon} alt="search" />
+      </button>
+      
 
       <input
         value={value}
@@ -57,16 +69,10 @@ export const Search: FC<SearchProps> = ({ handleDateChange }) => {
         type="text"
       />
 
-      <button
-        onClick={() => {
-          if (currentUserId) {
-            handleSearch(currentUserId);
-          }
-        }}
-      >
-        поиск
+      
+      <button className={classNames(style.searchDeleteButton, Poppins.className)} onClick={handleSb}>
+      <Image className={style.searchDeleteIcon} src={searchDeleteIcon} alt="delete" />
       </button>
-      <button onClick={handleSb}>сбросить</button>
     </div>
   );
 };

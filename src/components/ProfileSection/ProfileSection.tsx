@@ -181,7 +181,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
           {!isInfoRed && (
             <p className={classNames(Poppins.className, style.info)}>
               <span style={{ fontSize: "20px", fontWeight: "700" }}>
-                Information:
+                About me: 
               </span>{" "}
               {info}
             </p>

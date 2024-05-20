@@ -5,8 +5,9 @@
   border-radius: 25px;
   justify-content: center;
   align-items: center;
+  text-align: center;
   gap: 20px;
-  padding: 20px;
+  padding: 10px;
 }
 
 .formTitle {
@@ -27,7 +28,7 @@
   padding: 20px;
 }
 .formHeaders {
-  font-size: 32px;
+  font-size: 28px;
   color: #ffffff;
   font-weight: 700;
 }
@@ -58,6 +59,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  text-align: center;
+ 
 }
 .challengeSendButton {
   border-radius: 25px;

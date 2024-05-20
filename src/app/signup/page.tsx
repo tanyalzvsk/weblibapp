@@ -68,7 +68,7 @@ export default function Login() {
           // name: 'TEST',
           info: "will be added soon",
           // email,
-          name: login + "TEST",
+          name: login,
           // info,
         }),
       });
