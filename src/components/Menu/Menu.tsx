@@ -12,7 +12,7 @@ import swapIcon from "../../../public/swap.svg";
 import trophyIcon from "../../../public/trophy.svg";
 import userIcon from "../../../public/user.svg";
 import stackIcon from "../../../public/stack.svg";
-import settingsIcon from "../../../public/settings.svg";
+import menuIcon from "../../../public/menu.svg";
 import quitIcon from "../../../public/quit.svg";
 import classNames from "classnames";
 import { useRouter } from "next/navigation";
@@ -70,7 +70,7 @@ export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
     {
       name: "Back",
       link: " ",
-      imageSrc: settingsIcon.src,
+      imageSrc: menuIcon.src,
     },
     {
       name: "Quit",
