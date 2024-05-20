@@ -18,7 +18,7 @@ import Image from "next/image";
 import { API_URL, API_USER_ID, BASE_API_URL } from "@/constants";
 import { useAuthCheck } from "@/utils";
 
-export type BookStatus = "to read" | "reading" | "complete";
+export type BookStatus = "read" | "reading" | "complete";
 export type BookStatusDB = "Прочитано" | "Буду читать" | "Читаю сейчас";
 
 export interface BookCardProps extends IBook {
@@ -28,7 +28,7 @@ export interface BookCardProps extends IBook {
 export const convertBookStatusToApp = (
   status: BookStatusDB | string
 ): BookStatus | null => {
-  if (status === "Буду читать") return "to read";
+  if (status === "Буду читать") return "read";
 
   if (status === "Читаю сейчас") return "reading";
 
@@ -38,7 +38,7 @@ export const convertBookStatusToApp = (
 };
 
 export const convertBookStatusToBd = (status: BookStatus): BookStatusDB => {
-  if (status === "to read") return "Буду читать";
+  if (status === "read") return "Буду читать";
 
   if (status === "reading") return "Читаю сейчас";
 
@@ -122,7 +122,7 @@ export const BookCard: FC<BookCardProps> = ({
 
     setIsLoading(true);
     try {
-      await changeStatus(book_id, "to read", currentUserId);
+      await changeStatus(book_id, "read", currentUserId);
     } catch (error) {
       console.log(error);
     } finally {
@@ -174,7 +174,7 @@ export const BookCard: FC<BookCardProps> = ({
       </p>
 
       <div className={style.actions}>
-        {currentStatus !== "to read" && (
+        {currentStatus !== "read" && (
           <button
             className={classNames(style.action, style.read)}
             onClick={(event) => {
