@@ -12,10 +12,15 @@ import {
 import style from "./ProfileSection.module.css";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
-import Image from "next/image";
+// import Image from "next/image";
 import { API_URL, BASE_API_URL } from "@/constants";
 import { IUser } from "@/types";
 import { UserContext } from "@/utils";
+
+import { Avatar, Space, Typography, Flex, Button, Input, Upload } from "antd";
+import { cssTransition } from "react-toastify";
+const { Title, Text } = Typography;
+const { TextArea } = Input;
 
 export interface ProfileSectionProps extends IUser {
   name: string;
@@ -120,99 +125,144 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
 
   return (
     <section className={style.section}>
-      <div className={style.avatarWrapper}>
-        {avatar && (
-          <Image
-            src={`${BASE_API_URL}/avatars/${avatar}`}
-            alt={`${name} image`}
-            fill
-            style={{ borderRadius: "16px" }}
-          />
-        )}
-      </div>
+      {avatar && (
+        <Avatar
+          src={`${BASE_API_URL}/avatars/${avatar}`}
+          alt={`${name} image`}
+          size={180}
+          style={{ borderRadius: "16px" }}
+        />
+      )}
 
-      <div className={style.profileInfo}>
-        <h3 className={classNames(style.title, Poppins.className)}>{name}</h3>
+      <Flex className={style.profileInfo} vertical gap="middle">
+        <Title
+          level={3}
+          style={{
+            fontSize: "48px",
+            color: "white",
+            marginBottom: "0px",
+          }}
+          className={classNames(style.title, Poppins.className)}
+        >
+          {name}
+        </Title>
 
         {isMe && (
-          <div className={style.wrapfile}>
-            <input
-              type="file"
-              name="avatar"
-              onChange={handleFileChange}
-              ref={ref}
-              style={{ display: "none" }}
-            />
+          <Flex className={style.wrapfile}>
+            <Upload
+              beforeUpload={(file) => {
+                setSelectedFile(file);
+                return false;
+              }}
+              showUploadList={false}
+              accept="image/*"
+            >
+              <Button
+                className={style.btn}
+                style={{
+                  borderRadius: "25px",
+                  backgroundColor: "rgba(43, 19, 19, 0.7)",
+                  color: "white",
+                  border: "none",
+                }}
+              >
+                Change avatar
+              </Button>
+            </Upload>
 
             {selectedFile && !isInfoRed && (
-              <p className={classNames(Poppins.className, style.filename)}>
+              <Text className={classNames(Poppins.className, style.filename)}>
                 {selectedFile.name}
-              </p>
+              </Text>
             )}
 
-            <div className={style.controlsBtn}>
+            <Flex className={style.controlsBtn}>
               {selectedFile && !isInfoRed && (
-                <button onClick={handleUpload} className={style.btn}>
-                  Upload avatar
-                </button>
+                <Button
+                  onClick={handleUpload}
+                  className={style.btn}
+                  style={{
+                    borderRadius: "25px",
+                    backgroundColor: "rgba(43, 19, 19, 0.7)",
+                    color: "white",
+                    border: "none",
+                  }}
+                >
+                  Upload Avatar
+                </Button>
               )}
 
-              {!isInfoRed && (
-                <button onClick={handleChangeAvatar} className={style.btn}>
-                  Change avatar
-                </button>
-              )}
-
               {selectedFile && !isInfoRed && (
-                <button
+                <Button
                   onClick={() => {
                     setSelectedFile(null);
                   }}
                   className={style.btn}
+                  style={{
+                    borderRadius: "25px",
+                    backgroundColor: "rgba(43, 19, 19, 0.7)",
+                    color: "white",
+                    border: "none",
+                  }}
                 >
-                  Unselect avatar
-                </button>
+                  Unselect Avatar
+                </Button>
               )}
-            </div>
-          </div>
+            </Flex>
+          </Flex>
         )}
 
-        <div className={style.contentWrap}>
+        <Flex className={style.contentWrap}>
           {!isInfoRed && (
-            <p className={classNames(Poppins.className, style.info)}>
-              <span style={{ fontSize: "20px", fontWeight: "700" }}>
-                About me: 
-              </span>{" "}
-              {info}
-            </p>
+            <Text
+              style={{
+                color: "white",
+              }}
+              className={classNames(Poppins.className, style.info)}
+            >
+              <Space style={{ fontSize: "20px", fontWeight: "700" }}>
+                About me:  
+              </Space>
+              {""}
+              <Text
+                strong
+                style={{ color: "rgba(43, 19, 19, 0.7)", fontSize: "16px" }}
+              >
+                {" "}
+                {info}{" "}
+              </Text>
+            </Text>
           )}
 
           {isInfoRed && (
-            <textarea
+            <TextArea
               value={newVal}
-              onChange={(e) => {
-                setNewVal(e.target.value);
-              }}
-              className={style.textare}
-            >
-              {newVal}
-            </textarea>
+              onChange={(e) => setNewVal(e.target.value)}
+              className={style.textarea}
+              rows={2}
+            />
           )}
 
           {!isInfoRed && isMe && (
-            <button
+            <Button
               onClick={() => {
                 setIsInfoRed(true);
               }}
               className={style.btn}
+              style={{
+                borderRadius: "25px",
+                backgroundColor: "rgba(43, 19, 19, 0.7)",
+                color: "white",
+                border: "none",
+              }}
             >
-              Change
-            </button>
+              Change bio
+            </Button>
           )}
 
           {isInfoRed && (
             <div className={style.redInfo}>
-              <button
+              <Button
                 className={style.btn}
                 onClick={() => {
                   if (currentUserId) {
@@ -221,8 +271,8 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
                 }}
               >
                 save
-              </button>
-              <button
+              </Button>
+              <Button
                 className={style.btn}
                 onClick={() => {
                   setIsInfoRed(false);
@@ -233,23 +283,33 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
                 }}
               >
                 cancel
-              </button>
+              </Button>
             </div>
           )}
-        </div>
+        </Flex>
 
         {!isFriend && onAddFriend && (
-          <button className={style.friendButton} onClick={onAddFriend}>
+          <Button className={style.friendButton} onClick={onAddFriend}  style={{
+            borderRadius: "25px",
+            backgroundColor: "rgba(43, 19, 19, 0.7)",
+            color: "white",
+            border: "none",
+          }}>
             Add friend
-          </button>
+          </Button>
         )}
 
         {isFriend && onRemoveFriend && (
-          <button className={style.friendButton} onClick={onRemoveFriend}>
+          <Button className={style.friendButton} onClick={onRemoveFriend}  style={{
+            borderRadius: "25px",
+            backgroundColor: "rgba(43, 19, 19, 0.7)",
+            color: "white",
+            border: "none",
+          }}>
             Remove friend
-          </button>
+          </Button>
         )}
-      </div>
+      </Flex>
     </section>
   );
 };

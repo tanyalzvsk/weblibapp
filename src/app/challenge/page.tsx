@@ -14,6 +14,8 @@ import { UserContext, useAuthCheck } from "@/utils";
 import { useRouter } from "next/navigation";
 import { IFriendChallenge } from "@/types";
 
+import { Progress, Space } from "antd";
+
 export default function Challenge() {
   const [challenge, setChallenge] = useState<{
     book_read: number;
@@ -112,6 +114,11 @@ export default function Challenge() {
     return copy;
   }, [friendsChallengeData, currentUserId, challenge]);
 
+  const progressPercentage =
+    challenge && challenge.book_want > 0
+      ? (challenge.book_read / challenge.book_want) * 100
+      : 0;
+
   return (
     <PageWrapper backgroundSrc={background.src} className={style.page}>
       <Menu />
@@ -154,6 +161,7 @@ export default function Challenge() {
                   </p>
                 </div>{" "}
               </div>
+
               <button
                 className={classNames(
                   style.challengeSendButton,
@@ -163,6 +171,17 @@ export default function Challenge() {
               >
                 Change
               </button>
+              <Progress
+                percent={progressPercentage}
+                status={progressPercentage === 100 ? "success" : "active"}
+                format={() =>
+                  `${challenge?.book_read} / ${challenge?.book_want}`
+                }
+                trailColor="#dda3c899"
+                strokeColor="rgba(245, 202, 123, 0.7)"
+                percentPosition={{ align: "center", type: "inner" }}
+                size={{ height: 20 }}
+              />
             </div>
           </div>
 
@@ -193,7 +212,8 @@ export default function Challenge() {
             {challengeList.map((friend_challenge) => (
               <div
                 className={classNames(style.friendChallengeWrap, {
-                  [style.myFriendChallengeWrap]: friend_challenge.friend_name === "You",
+                  [style.myFriendChallengeWrap]:
+                    friend_challenge.friend_name === "You",
                 })}
                 key={friend_challenge.friend_id}
               >

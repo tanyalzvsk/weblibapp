@@ -33,11 +33,7 @@
   font-weight: 700;
 }
 
-.profileInfo {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
+
 
 .filename {
   color: white;
@@ -70,7 +66,7 @@
 
 .btn:hover {
   cursor: pointer;
-  background-color: rgb(43, 19, 19, 1);
+  background-color: rgb(43, 19, 19, 0.7);
 }
 
 .contentWrap {

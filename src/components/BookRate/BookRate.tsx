@@ -1,35 +1,37 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import style from "./BookRate.module.css";
-import classNames from "classnames";
-import { Rating } from "../ReviewForm";
+import { Rate, Flex } from "antd";
+import { HeartOutlined } from "@ant-design/icons";
 
 export interface BookRateProps {
-  onRateChange: (newRate: Rating) => void;
+  onRateChange: (newRate: number) => void;
 }
-
-const availableRatings: Rating[] = [1, 2, 3, 4, 5];
 
 export const BookRate: FC<BookRateProps> = ({ onRateChange }) => {
   const [myRate, setMyRate] = useState<number>(1);
-  const [selectedRate, setSelectedRate] = useState<number>(0);
+
+  useEffect(() => {
+    const savedRate = localStorage.getItem("userBookRating");
+
+    if (savedRate) {
+      setMyRate(Number(savedRate));
+    }
+  }, []);
+
+  const handleRateChange = (value: number) => {
+    setMyRate(value);
+    onRateChange(value);
+    localStorage.setItem("userBookRating", value.toString());
+  };
 
   return (
-    <div className={style.rate}>
-      {availableRatings.map((rate) => (
-        <div
-          key={rate}
-          className={classNames(style.rateIcon, {
-            [style.selected]: rate <= myRate,
-            [style.hovered]: rate <= selectedRate,
-          })}
-          onClick={() => {
-            setMyRate(rate);
-            onRateChange(rate);
-          }}
-          onMouseEnter={() => setSelectedRate(rate)}
-          onMouseLeave={() => setSelectedRate(0)}
-        />
-      ))}
-    </div>
+    <Flex className={style.rate}>
+      <Rate
+        character={<HeartOutlined />}
+        value={myRate}
+        onChange={handleRateChange}
+        style={{ color: "rgba(64, 4, 4, 0.9)", fontSize: "36px" }}
+      />
+    </Flex>
   );
 };

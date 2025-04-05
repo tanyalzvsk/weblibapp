@@ -17,35 +17,39 @@
   gap: 25px;
 }
 
-.title {
+div>.title {
   color: white;
   font-size: 60px;
   font-weight: 700;
 }
 
-.subtitle {
+div>.subtitle {
   color: white;
   font-size: 20px;
   font-weight: 400;
   font-style: italic;
 }
 
-.rating {
-  color: white;
-  font-size: 60px;
-  font-weight: 700;
-}
+
 
 .rate {
+  color: white;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 20px;
 }
 
-.annotation {
+div>.annotation {
   color: white;
   font-size: 16px;
   font-weight: 400;
   font-style: italic;
+}
+
+.switchContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  max-width: 900px;
+  gap: 20px;
 }

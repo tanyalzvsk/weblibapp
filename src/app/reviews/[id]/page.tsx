@@ -20,6 +20,7 @@ import { UserContext, useAuthCheck } from "@/utils";
 import "../../../../public/heart.svg";
 import Image from "next/image";
 import { Bounce, toast } from "react-toastify";
+import { Avatar } from "antd";
 
 export default function CurrentReviews() {
   const params = useParams<{ id: string }>();
@@ -356,10 +357,10 @@ export default function CurrentReviews() {
                 <div key={comment.review_comment_id} className={style.comment}>
                   {comment.user_avatar && (
                     <div className={style.avatar}>
-                      <Image
+                      <Avatar
                         src={`${BASE_API_URL}/avatars/${comment.user_avatar}`}
                         alt={`${comment.user_id} image`}
-                        fill
+                        size={40} // Adjust the size as needed
                       />
                     </div>
                   )}

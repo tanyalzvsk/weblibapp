@@ -14,12 +14,14 @@ import { Poppins } from "@/fonts";
 import classNames from "classnames";
 import { useRouter } from "next/navigation";
 import { UserContext, generateRandomColor } from "@/utils";
-import Image from "next/image";
+//import Image from "next/image";
 import { API_URL, API_USER_ID, BASE_API_URL } from "@/constants";
 import { useAuthCheck } from "@/utils";
 
 export type BookStatus = "read" | "reading" | "complete";
 export type BookStatusDB = "Прочитано" | "Буду читать" | "Читаю сейчас";
+
+import { Image } from "antd";
 
 export interface BookCardProps extends IBook {
   backgroundColor?: string;
@@ -162,7 +164,7 @@ export const BookCard: FC<BookCardProps> = ({
 
         {path ? (
           <div className={style.imageWrapper}>
-            <Image src={`${BASE_API_URL}/${path}`} alt={`${name} image`} fill />
+            <Image src={`${BASE_API_URL}/${path}`} alt={`${name} image`} />
           </div>
         ) : (
           <div className={style.tmpIcon}></div>

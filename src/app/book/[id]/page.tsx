@@ -2,9 +2,7 @@
 
 import { PageWrapper, Menu, BookInfoSection, ReviewCard } from "@/components";
 import Modal from "react-modal";
-
 import style from "./page.module.css";
-
 import background from "../../../../public/page-background-main.png";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
@@ -14,13 +12,12 @@ import { IBook, ICollection, IReview } from "@/types";
 import { useParams } from "next/navigation";
 import { WriteReviewButton } from "@/components/WriteReviewButton";
 import ReviewForm from "@/components/ReviewForm/ReviewForm";
+import { Avatar, Space, Upload, Typography, Card, Flex, Tabs } from "antd";
 
-type filtersType = "reviews" | "collections" | "quotes";
-
-const enabledFilters: filtersType[] = ["reviews", "collections", "quotes"];
+const { Title, Text } = Typography;
 
 export default function BookPage() {
-  const [filter, setFilter] = useState<filtersType>("reviews");
+  const [filter, setFilter] = useState("reviews");
   const [book, setBook] = useState<IBook | null>(null);
   const [reviews, setReviews] = useState<IReview[] | null>(null);
   const [collections, setCollections] = useState<ICollection[]>([]);
@@ -42,15 +39,13 @@ export default function BookPage() {
     const reviewData: { success: boolean; reviews?: IReview[] } =
       await reviewResponse.json();
 
-    console.log("REVIWS", reviewData.reviews);
-
     if (reviewData.success && reviewData.reviews) {
       setReviews(reviewData.reviews);
     }
   }, [params.id]);
 
   const loadBook = useCallback(async () => {
-    const bookResposnse = await fetch(`${API_URL}/search/id`, {
+    const bookResponse = await fetch(`${API_URL}/search/id`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -58,33 +53,14 @@ export default function BookPage() {
       body: JSON.stringify(`${params.id}`),
     });
 
-    const bookData: IBook = await bookResposnse.json();
-
-    console.log("BOOK", bookData);
-
+    const bookData: IBook = await bookResponse.json();
     setBook(bookData);
-
     loadReviews();
   }, [loadReviews, params.id]);
 
-  // const loadCollections = useCallback(async() => {
-  //   const collectionsResponse = await fetch(`${API_URL}/bookcollection/${params.id}`);
-
-  //   const collectionsData: ICollection[] = await collectionsResponse.json();
-
-  //   setCollections(collectionsData);
-  // }, [params.id]);
-
-  // useEffect(() => {
-  //   loadBook();
-  //   loadCollections();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
   useEffect(() => {
     loadBook();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadBook]);
 
   return (
     <PageWrapper backgroundSrc={background.src} className={style.page}>
@@ -101,59 +77,93 @@ export default function BookPage() {
 
       <Menu />
 
-      <div className={style.pageContent}>
+      <Flex className={style.pageContent}>
         {book && <BookInfoSection {...book} />}
 
-        <div className={style.tabsWrapper}>
-          {enabledFilters.map((item) => (
-            <div
-              key={item}
-              className={classNames(style.tab, {
-                [style.selected]: filter === item,
-              })}
-              onClick={() => {
-                if (filter !== item) {
-                  setFilter(item);
-                }
-              }}
-            >
-              <p className={classNames(style.tabTitle, Poppins.className)}>
-                {item}
-              </p>
-            </div>
-          ))}
-        </div>
+        <Tabs
+          defaultActiveKey="reviews"
+          activeKey={filter}
+          onChange={setFilter}
+          className={style.tabsWrapper}
+          type="card"
+          style={{ color: 'white' }}
+          tabBarStyle={{
+            padding: "16px 18px",
+            borderRadius: "25px 0 25px 0",
+            transition: "0.3s",
+            
+          }}
+          items={ [
+            {
+              key: "reviews",
+              label: (<span style={{ color: filter === "reviews" ? 'rgba(43, 19, 19, 0.7)' : 'white ', fontSize: '18px'}}> 
+                reviews
+              </span>),
+              
+              children: (
+                
+                <Flex gap={20}>
+                  <WriteReviewButton
+                    handleClick={() =>
+                      setIsReviewFormVisible((state) => !state)
+                    }
+                  />
+                  {reviews &&
+                    reviews.map((item) => (
+                      <ReviewCard key={item.review_id} {...item} />
+                    ))}
+                </Flex>
+              ),
+            },
+            {
+              key: "collections",
+              label:(<span style={{ color: filter === "collections" ? 'rgba(43, 19, 19, 0.7)' : 'white ', fontSize: '18px'}}> 
+                collections
+              </span>),
+              children: (
+                <Flex gap={20}>
+                  <Title level={2} style={{ color: "white" }}>
+                    No collections available for this book.
+                  </Title>
+                </Flex>
+              ),
+            },
+            {
+              key: "quotes",
+              label: (<span style={{ color: filter === "quotes" ? 'rgba(43, 19, 19, 0.7)' : 'white ', fontSize: '18px'}}> 
+                quotes
+              </span>),
+              children: (
+                <Flex gap={20}>
+                  {[1, 2, 3].map((item) => (
+                    <Card className={style.quote} key={item}>
+                      <Title
+                        level={3}
+                        className={classNames(style.title, Poppins.className)}
+                        style={{ color: "white" }}
+                      >
+                        Tomas Li the {item}
+                      </Title>
 
-        <div className={style.mainContent}>
-          <WriteReviewButton
-            handleClick={() => setIsReviewFormVisible((state) => !state)}
-          />
-
-          {filter === "reviews" &&
-            reviews &&
-            reviews.map((item) => (
-              <ReviewCard key={item.review_id} {...item} />
-            ))}
-
-          {/* {filter === "collections" &&
-            books.map((item) => <BookCard key={item.book_id} {...item} />)} */}
-
-          {filter === "quotes" &&
-            [1, 2, 3].map((item) => (
-              <div className={style.quote} key={item}>
-                <h5 className={classNames(style.title, Poppins.className)}>
-                  Tomas Li the {item}
-                </h5>
-
-                <p className={classNames(style.description, Poppins.className)}>
-                  {item} &#34;A powerful story set in the Deep South, tackling
-                  themes of racism and injustice through the eyes of a young
-                  girl.&#34;
-                </p>
-              </div>
-            ))}
-        </div>
-      </div>
+                      <Text
+                        className={classNames(
+                          style.description,
+                          Poppins.className
+                        )}
+                        style={{ color: "white" }}
+                      >
+                        &#34;A powerful story set in the Deep South, tackling
+                        themes of racism and injustice through the eyes of a
+                        young girl.&#34;
+                      </Text>
+                    </Card>
+                  ))}
+                </Flex>
+              ),
+            },
+          ]}
+        ></Tabs>
+      </Flex>
     </PageWrapper>
   );
 }

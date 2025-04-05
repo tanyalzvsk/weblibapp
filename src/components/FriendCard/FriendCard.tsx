@@ -1,6 +1,13 @@
 "use client";
 
-import { FC, useCallback, useContext, useMemo, useEffect, useState } from "react";
+import {
+  FC,
+  useCallback,
+  useContext,
+  useMemo,
+  useEffect,
+  useState,
+} from "react";
 import style from "./FriendCard.module.css";
 import { IUser } from "@/types";
 import { Poppins } from "@/fonts";
@@ -10,6 +17,7 @@ import { UserContext, generateRandomColor } from "@/utils";
 import { API_URL, BASE_API_URL } from "@/constants";
 import { useRouter } from "next/navigation";
 
+import { Avatar } from "antd";
 
 export interface FriendCardProps extends IUser {
   isFriend?: boolean;
@@ -134,10 +142,11 @@ export const FriendCard: FC<FriendCardProps> = ({
     >
       {avatarUrl ? (
         <div className={style.imageWrapper}>
-          <Image
+          <Avatar
             src={`${BASE_API_URL}/avatars/${avatarUrl}`}
             alt={`${name} image`}
-            fill
+            size={96} 
+            style={{ borderRadius: "5px" }} 
           />
         </div>
       ) : (

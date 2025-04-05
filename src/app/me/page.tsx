@@ -24,6 +24,10 @@ import { UserContext, useAuthCheck } from "@/utils";
 import { getMonthName } from "@/utils";
 import { useRouter } from "next/navigation";
 
+import { Avatar, Typography, Tabs, Flex } from 'antd';
+const { Title, Text } = Typography;
+const { TabPane } = Tabs;
+
 interface Me {
   id: number;
   name: string;
@@ -249,7 +253,7 @@ export default function Me() {
     [isLoading, loadFriendsData]
   );
 
-  const loadCollectios = useCallback(
+  const loadCollections = useCallback(
     async (id: number) => {
       if (isLoading) return;
 
@@ -288,7 +292,7 @@ export default function Me() {
       }
 
       if (filter === "collections" && currentUserId) {
-        loadCollectios(currentUserId);
+        loadCollections(currentUserId);
         return;
       }
 
@@ -302,7 +306,7 @@ export default function Me() {
       loadReadBooks,
       loadReadingBooks,
       loadReviews,
-      loadCollectios,
+      loadCollections,
       loadFriends,
       currentUserId,
     ]
@@ -324,10 +328,10 @@ export default function Me() {
     <PageWrapper backgroundSrc={background.src} className={style.page}>
       <Menu />
 
-      <div className={style.pageContent}>
+      <Flex className={style.pageContent}>
         <ProfileSection {...me} onChangeInfo={changeInfoSuccessHandler} isMe />
 
-        <div className={style.tabsWrapper}>
+        {/* <div className={style.tabsWrapper}>
           {enabledFilters.map((item) => (
             <div
               key={item}
@@ -347,8 +351,8 @@ export default function Me() {
             </div>
           ))}
         </div>
-
-        <div className={style.mainContent}>
+  */}
+        {/* <div className={style.mainContent}>
           {filter === "read" &&
             books.map((item) => <BookCard key={item.book_id} {...item} />)}
 
@@ -371,10 +375,8 @@ export default function Me() {
                 if (!book.date) {
                   return;
                 }
-                const month = +book.date.substr(5, 2); // Извлечение месяца из поля date (предполагается формат 'year-month-day')
-
-                // Если текущий месяц отличается от полученного месяца, выводим название месяца
-               if (currentMonth !== month) {
+                const month = +book.date.substr(5, 2);
+                if (currentMonth !== month) {
                   currentMonth = month;
                   return (
                     <div key={month} className={style.monthAndBooksContainer}>
@@ -388,14 +390,12 @@ export default function Me() {
                       </h1>
                       <div className={style.booksContainer}>
                         <BookCard key={book.book_id} {...book} />{" "}
-                   
-                        
                       </div>
                     </div>
                   );
                 }
 
-               return <BookCard key={book.book_id} {...book} />; 
+                return <BookCard key={book.book_id} {...book} />;
               })}
 
           {filter === "reviews" &&
@@ -421,8 +421,206 @@ export default function Me() {
                 {...friend}
               />
             ))}
-        </div>
-      </div>
+        </div> */}
+
+        <Tabs
+          defaultActiveKey="read"
+          activeKey={filter}
+          onChange={(activeKey: string) => {
+            const newFilter = activeKey as filtersType;
+            setFilter(newFilter);
+            loadCurrentBooks(newFilter);
+          }}
+          className={style.tabsWrapper}
+          type="card"
+          tabBarStyle={{
+            padding: "16px 18px",
+            borderRadius: "25px 0 25px 0",
+            transition: "0.3s",
+          }}
+          items={[
+            {
+              key: "read",
+              label: (
+                <span
+                  style={{
+                    color:
+                      filter === "read" ? "rgba(43, 19, 19, 0.7)" : "white ",
+                    fontSize: "18px",
+                  }}
+                >
+                  reviews
+                </span>
+              ),
+
+              children: (
+                <Flex gap={20} wrap>
+                  {books.map((item) => (
+                    <BookCard key={item.book_id} {...item} />
+                  ))}
+                </Flex>
+              ),
+            },
+            {
+              key: "reading",
+              label: (
+                <span
+                  style={{
+                    color:
+                      filter === "reading" ? "rgba(43, 19, 19, 0.7)" : "white ",
+                    fontSize: "18px",
+                  }}
+                >
+                  reading
+                </span>
+              ),
+              children: (
+                <Flex gap={20}>
+                  {books.map((item) => (
+                    <BookCard key={item.book_id} {...item} />
+                  ))}
+                </Flex>
+              ),
+            },
+            {
+              key: "completed",
+              label: (
+                <span
+                  style={{
+                    color:
+                      filter === "completed"
+                        ? "rgba(43, 19, 19, 0.7)"
+                        : "white ",
+                    fontSize: "18px",
+                  }}
+                >
+                  completed
+                </span>
+              ),
+
+              children: (
+                <Flex gap={20}>
+                  {books
+                    .sort((a, b) => {
+                      if (a.date && b.date) {
+                        const dateA = new Date(a.date);
+                        const dateB = new Date(b.date);
+
+                        return dateA.getTime() - dateB.getTime();
+                      }
+
+                      return 0;
+                    })
+                    .map((book) => {
+                      if (!book.date) {
+                        return;
+                      }
+                      const month = +book.date.substr(5, 2);
+                      if (currentMonth !== month) {
+                        currentMonth = month;
+                        return (
+                          <div
+                            key={month}
+                            className={style.monthAndBooksContainer}
+                          >
+                            <h1
+                              className={classNames(
+                                style.monthTitle,
+
+                                Poppins.className
+                              )}
+                            >
+                              {" "}
+                              {getMonthName(month)}
+                            </h1>
+                            <div className={style.booksContainer}>
+                              <BookCard key={book.book_id} {...book} />{" "}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return <BookCard key={book.book_id} {...book} />;
+                    })}
+                </Flex>
+              ),
+            },
+            {
+              key: "collections",
+              label: (
+                <span
+                  style={{
+                    color:
+                      filter === "collections"
+                        ? "rgba(43, 19, 19, 0.7)"
+                        : "white ",
+                    fontSize: "18px",
+                  }}
+                >
+                  collections
+                </span>
+              ),
+              children: (
+                <Flex gap={20}>
+                  {collections.map((collection) => (
+                    <CollectionCard key={collection.id} {...collection} />
+                  ))}
+                </Flex>
+              ),
+            },
+            {
+              key: "reviews",
+              label: (
+                <span
+                  style={{
+                    color:
+                      filter === "reviews" ? "rgba(43, 19, 19, 0.7)" : "white ",
+                    fontSize: "18px",
+                  }}
+                >
+                  reviews
+                </span>
+              ),
+              children: (
+                <Flex gap={20} wrap>
+                  {reviews.map((review) => (
+                    <ReviewCard key={review.review_id} {...review} />
+                  ))}
+                </Flex>
+              ),
+            },
+            {
+              key: "friends",
+              label: (
+                <span
+                  style={{
+                    color:
+                      filter === "friends" ? "rgba(43, 19, 19, 0.7)" : "white ",
+                    fontSize: "18px",
+                  }}
+                >
+                  friends
+                </span>
+              ),
+              children: (
+                <Flex gap={20} wrap>
+                  {friends.map((friend) => (
+                    <FriendCard
+                      isFriend
+                      key={friend.id + friend.name}
+                      onSuccess={(id) =>
+                        setFriends((friends) =>
+                          friends.filter((friend) => friend.id !== id)
+                        )
+                      }
+                      {...friend}
+                    />
+                  ))}
+                </Flex>
+              ),
+            },
+          ]}
+        ></Tabs>
+      </Flex>
     </PageWrapper>
   );
 }

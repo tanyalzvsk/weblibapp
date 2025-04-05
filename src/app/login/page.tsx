@@ -1,17 +1,25 @@
 "use client";
 
 import { PageWrapper } from "@/components";
-import { useCallback, useContext, useEffect } from "react";
-
-import style from "./page.module.css";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import { Typography, Input, Button, Form, Flex } from "antd";
+import classNames from "classnames";
+import { Bounce, toast } from "react-toastify";
 
 import background from "../../../public/page-background-login.png";
-import classNames from "classnames";
 import { Poppins } from "@/fonts";
 import { useRouter } from "next/navigation";
 import { API_URL, Pages } from "@/constants";
-import { Resolver, SubmitHandler, useForm } from "react-hook-form";
+import { Controller, Resolver, SubmitHandler, useForm } from "react-hook-form";
 import { UserContext } from "@/utils";
+import { getRandomQuote } from "@/utils/quotes";
+
+import FormItem from "antd/es/form/FormItem";
+import Password from "antd/es/input/Password";
+import style from "./page.module.css";
+
+const { Paragraph, Title, Text } = Typography;
 
 type LoginValues = {
   login: string;
@@ -36,8 +44,11 @@ export default function Login() {
   const router = useRouter();
 
   const { updateUserId } = useContext(UserContext)!;
+  const [quote, setQuote] = useState("");
 
   useEffect(() => {
+    setQuote(getRandomQuote());
+
     if (typeof window === "undefined") {
       return;
     }
@@ -50,12 +61,14 @@ export default function Login() {
     }
   }, [router, updateUserId]);
 
-  const { handleSubmit, register, formState } = useForm<LoginValues>({
+  const { handleSubmit, formState, control } = useForm<LoginValues>({
     resolver,
   });
 
   const handleLogin: SubmitHandler<LoginValues> = useCallback(
     async ({ login, password }) => {
+      console.log("log", login, password);
+
       if (!formState.isValid) {
         return;
       }
@@ -73,7 +86,19 @@ export default function Login() {
         }),
       });
 
-      const data: { success: boolean; userId?: number } = await response.json();
+      const data: { success: boolean; userId?: number; message?: string } =
+        await response.json();
+
+      if (!data.success && data.message) {
+        toast(data.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
+      }
 
       console.log("login data", data);
 
@@ -95,48 +120,87 @@ export default function Login() {
 
   return (
     <PageWrapper backgroundSrc={background.src} className={style.page}>
-      <div className={style.glass}>
-        <div className={style.loginWrapper}>
-          <h1 className={classNames(style.title, Poppins.className)}>
-            Welcome back
-          </h1>
+      <Flex
+        className={style.glass}
+        gap="70px"
+        vertical
+        justify="center"
+        align="center"
+      >
+        <Flex
+          className={style.loginWrapper}
+          gap="30px"
+          vertical
+          justify="center"
+          align="center"
+        >
+          <Title
+            className={classNames(style.title, Poppins.className)}
+            style={{ color: "white" }}
+          >
+            Welcome to forWords!
+          </Title>
 
-          <form onSubmit={handleSubmit(handleLogin)} className={style.controls}>
-            <input
-              {...register("login")}
-              className={classNames(style.input, Poppins.className)}
-              type="text"
-              placeholder="login"
-            />
-            <input
-              {...register("password")}
-              className={classNames(style.input, Poppins.className)}
-              type="password"
-              placeholder="password"
+          <Form onFinish={handleSubmit(handleLogin)} className={style.controls}>
+            <Controller
+              name="login"
+              control={control}
+              render={({ field }) => (
+                <FormItem
+                  name={field.name}
+                  className={style.loginFormItem}
+                  rules={[{ required: true }]}
+                >
+                  <Input
+                    {...field}
+                    className={style.input}
+                    autoComplete="off"
+                    placeholder="login"
+                  />
+                </FormItem>
+              )}
             />
 
-            <button
-              className={classNames(style.loginButton, Poppins.className)}
-              type="submit"
+            <Controller
+              name="password"
+              control={control}
+              render={({ field }) => (
+                <FormItem name={field.name} rules={[{ required: true }]}>
+                  <Password
+                    {...field}
+                    iconRender={(visible) =>
+                      visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                    }
+                    className={style.input}
+                    autoComplete="off"
+                    placeholder="password"
+                  />
+                </FormItem>
+              )}
+            />
+
+            <Button
+              className={style.loginButton}
+              type="default"
+              htmlType="submit"
             >
-              Log in
-            </button>
-          </form>
-        </div>
+              <Text>Log in</Text>
+            </Button>
+          </Form>
+        </Flex>
 
         <div className={style.bottomContent}>
-          <button
+          <Button
             onClick={handleSignup}
-            className={classNames(style.signUpButton, Poppins.className)}
+            className={classNames(style.signUpButton)}
+            type="default"
           >
-            Sign Up
-          </button>
+            <Text>Sign Up</Text>
+          </Button>
 
-          <p className={classNames(style.tip, Poppins.className)}>
-            tip: don&#39;t read books while driving a car
-          </p>
+          <Paragraph className={classNames(style.tip)}>{quote}</Paragraph>
         </div>
-      </div>
+      </Flex>
     </PageWrapper>
   );
 }
