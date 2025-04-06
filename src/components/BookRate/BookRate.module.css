@@ -16,40 +16,4 @@
     position: relative;
   }
   
-  .rateIcon::before,
-  .rateIcon::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    width: 15px;
-    height: 27px;
-    border-radius: 35px 35px 0 0;
-    background-color: #596275;
-    transition: background-color 0.3s ease;
-  }
-  
-  .rateIcon::before {
-    left: 15px;
-    transform: rotate(-45deg);
-    transform-origin: 0 100%;
-  }
-  
-  .rateIcon::after {
-    left: 0;
-    transform: rotate(45deg);
-    transform-origin: 100% 100%;
-  }
-  
-  .rateIcon:hover::before,
-  .rateIcon:hover::after,
-  .rateIcon.selected::before,
-  .rateIcon.selected::after {
-    cursor: pointer;
-    background-color: rgba(43, 19, 19, 0.9);
-  }
-
-  .rateIcon.hovered::before,
-  .rateIcon.hovered::after {
-    background-color: rgba(64, 4, 4, 0.9);
-  }
 

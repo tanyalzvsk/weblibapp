@@ -5,7 +5,14 @@
   display: flex;
   border-radius: 25px;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.70);
+}
+
+.search-light {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.search-dark {
+  background: #636e7266;
 }
 
 .searchIcon {
@@ -14,12 +21,19 @@
 }
 
 .searchInput {
-  flex-grow: 1; 
-  padding: 8px 12px; 
-  border: none; 
-  outline: none; 
+  flex-grow: 1;
+  padding: 8px 12px;
+  border: none;
+  outline: none;
   border-radius: 25px;
   background-color: rgba(255, 255, 255, -0.3);
+}
+.searchInput-light {
+  color: rgb(0, 0, 0);
+}
+
+.searchInput-dark {
+  color: rgb(255, 255, 255);
 }
 
 .searchButton {
@@ -30,7 +44,6 @@
   height: 50px;
   color: #ffffff;
   font-weight: 700;
-
 }
 
 .searchDeleteButton {

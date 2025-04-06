@@ -1,7 +1,8 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState, useContext } from "react";
 import style from "./BookRate.module.css";
 import { Rate, Flex } from "antd";
 import { HeartOutlined } from "@ant-design/icons";
+import { ThemeContext } from "@/utils";
 
 export interface BookRateProps {
   onRateChange: (newRate: number) => void;
@@ -9,7 +10,7 @@ export interface BookRateProps {
 
 export const BookRate: FC<BookRateProps> = ({ onRateChange }) => {
   const [myRate, setMyRate] = useState<number>(1);
-
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
   useEffect(() => {
     const savedRate = localStorage.getItem("userBookRating");
 
@@ -18,6 +19,7 @@ export const BookRate: FC<BookRateProps> = ({ onRateChange }) => {
     }
   }, []);
 
+  
   const handleRateChange = (value: number) => {
     setMyRate(value);
     onRateChange(value);
@@ -30,7 +32,7 @@ export const BookRate: FC<BookRateProps> = ({ onRateChange }) => {
         character={<HeartOutlined />}
         value={myRate}
         onChange={handleRateChange}
-        style={{ color: "rgba(64, 4, 4, 0.9)", fontSize: "36px" }}
+        style={{ color: currentTheme === 'dark' ? '#6c5ce7cc' : 'rgba(64, 4, 4, 0.9)', fontSize: "36px" }}
       />
     </Flex>
   );

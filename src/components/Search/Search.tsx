@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useCallback, useContext, useState } from "react";
+import { FC, useCallback, useContext, useState, useMemo} from "react";
 import Image from "next/image";
 import style from "./Search.module.css";
 
@@ -12,6 +12,10 @@ import { UserContext } from "@/utils";
 import { Poppins } from "@/fonts";
 import classNames from "classnames";
 
+import { ThemeContext } from "@/utils/ThemeContext";
+
+
+
 export interface SearchProps {
   handleDateChange: (data: ISearchData) => void;
 }
@@ -19,6 +23,7 @@ export interface SearchProps {
 export const Search: FC<SearchProps> = ({ handleDateChange }) => {
   const [value, setValue] = useState<string>("");
   const { currentUserId } = useContext(UserContext)!;
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
 
   const handleSearch = useCallback(
     async (id: number) => {
@@ -47,9 +52,20 @@ export const Search: FC<SearchProps> = ({ handleDateChange }) => {
     setValue("");
   };
 
+  const searchThemeClassName = useMemo(() => {
+    return "search-" + currentTheme;
+
+  }, [currentTheme]);
+
+  const searchInputThemeClassName = useMemo(( ) => {
+    return "searchInput-" + currentTheme;
+
+  }, [currentTheme]);
+  
   return (
-    <div className={style.search}>
+    <div className={classNames(style.search, style[searchThemeClassName])}>
        <button className={classNames(style.searchButton, Poppins.className)}
+     
         onClick={() => {
           if (currentUserId) {
             handleSearch(currentUserId);
@@ -65,8 +81,9 @@ export const Search: FC<SearchProps> = ({ handleDateChange }) => {
         onChange={(event) => {
           setValue(event.target.value);
         }}
-        className={style.searchInput}
+        className={classNames(style.searchInput, style[searchInputThemeClassName])}
         type="text"
+      
       />
 
       

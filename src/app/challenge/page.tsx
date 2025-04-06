@@ -10,11 +10,12 @@ import { Poppins } from "@/fonts";
 import ChallengeForm from "@/components/ChallengeForm/ChallengeForm";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { API_URL, API_USER_ID } from "@/constants";
-import { UserContext, useAuthCheck } from "@/utils";
+import { UserContext, useAuthCheck, ThemeContext } from "@/utils";
 import { useRouter } from "next/navigation";
 import { IFriendChallenge } from "@/types";
 
-import { Progress, Space } from "antd";
+import { Progress, Space, Typography, Flex } from "antd";
+const { Title } = Typography;
 
 export default function Challenge() {
   const [challenge, setChallenge] = useState<{
@@ -29,6 +30,7 @@ export default function Challenge() {
     useState<boolean>(false);
 
   const { currentUserId } = useContext(UserContext)!;
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
 
   const router = useRouter();
 
@@ -118,6 +120,13 @@ export default function Challenge() {
     challenge && challenge.book_want > 0
       ? (challenge.book_read / challenge.book_want) * 100
       : 0;
+  const challengeThemeClassName = useMemo(() => {
+    return "challenge-" + currentTheme;
+  }, [currentTheme]);
+
+  const friendChallengeThemeClassName = useMemo(() => {
+    return "friendChallenge-" + currentTheme;
+  }, [currentTheme]);
 
   return (
     <PageWrapper backgroundSrc={background.src} className={style.page}>
@@ -130,14 +139,27 @@ export default function Challenge() {
 
         <div className={style.wrap}>
           <div className={style.mainContent}>
-            <div className={style.challenge}>
-              <div className={classNames(style.formTitle, style.titleOfForm)}>
+            <div
+              className={classNames(
+                style.challenge,
+                style[challengeThemeClassName]
+              )}
+            >
+              <Flex
+                className={classNames(style.formTitle, style.titleOfForm)}
+                style={{
+                  backgroundColor:
+                    currentTheme === "dark"
+                      ? "#fab1a066"
+                      : "rgb(43, 19, 19, 0.5)",
+                }}
+              >
                 <h2
                   className={classNames(style.formHeaders, Poppins.className)}
                 >
                   Track your reading activity
                 </h2>
-              </div>
+              </Flex>
               <p className={classNames(style.consistency, Poppins.className)}>
                 Good job! Consistency is the key!
               </p>
@@ -177,8 +199,12 @@ export default function Challenge() {
                 format={() =>
                   `${challenge?.book_read} / ${challenge?.book_want}`
                 }
-                trailColor="#dda3c899"
-                strokeColor="rgba(245, 202, 123, 0.7)"
+                trailColor={currentTheme === "dark" ? "#dfe6e966" : "#dda3c899"}
+                strokeColor={
+                  currentTheme === "dark"
+                    ? "##fdcb6e66"
+                    : "rgba(245, 202, 123, 0.7)"
+                }
                 percentPosition={{ align: "center", type: "inner" }}
                 size={{ height: 20 }}
               />
@@ -200,7 +226,12 @@ export default function Challenge() {
               />
             )}
 
-          <div className={style.friendChallenge}>
+          <div
+            className={classNames(
+              style.friendChallenge,
+              style[friendChallengeThemeClassName]
+            )}
+          >
             <p
               className={classNames(
                 Poppins.className,

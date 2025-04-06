@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState, useMemo } from "react";
 import style from "./ChallengeForm.module.css";
 //import { ChallengeForm } from "../ChallengeForm";
 import classNames from "classnames";
@@ -11,7 +11,9 @@ import {
 } from "react-hook-form";
 import { API_URL, API_USER_ID } from "@/constants";
 import { Bounce, toast } from "react-toastify";
-import { UserContext } from "@/utils";
+import { UserContext, ThemeContext } from "@/utils";
+
+import { Flex } from "antd";
 
 type ChallengeFormProps = {
   onSuccess: (want: number) => void;
@@ -39,6 +41,7 @@ export const ChallengeForm: React.FC<ChallengeFormProps> = ({ onSuccess }) => {
   });
   const [amount, setAmount] = useState("");
   const { currentUserId } = useContext(UserContext)!;
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
 
   const handleFormSubmit: SubmitHandler<ChallengeFormValues> = useCallback(
     async (state) => {
@@ -84,14 +87,25 @@ export const ChallengeForm: React.FC<ChallengeFormProps> = ({ onSuccess }) => {
     },
     [formState.isValid, onSuccess, currentUserId]
   );
+  const challengeThemeClassName = useMemo(() => {
+    return "challenge-" + currentTheme;
+  }, [currentTheme]);
 
   return (
-    <div className={style.challenge}>
-      <div className={classNames(style.formTitle, style.titleOfForm)}>
+    <div
+      className={classNames(style.challenge, style[challengeThemeClassName])}
+    >
+      <Flex
+        className={classNames(style.formTitle, style.titleOfForm)}
+        style={{
+          backgroundColor:
+            currentTheme === "dark" ? "#fab1a066" : "rgb(43, 19, 19, 0.5)",
+        }}
+      >
         <h2 className={classNames(style.formHeaders, Poppins.className)}>
           Track your reading activity
         </h2>
-      </div>
+      </Flex>
 
       <form className={style.form} onSubmit={handleSubmit(handleFormSubmit)}>
         <div className={style.formInfo}>

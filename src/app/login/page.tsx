@@ -12,7 +12,7 @@ import { Poppins } from "@/fonts";
 import { useRouter } from "next/navigation";
 import { API_URL, Pages } from "@/constants";
 import { Controller, Resolver, SubmitHandler, useForm } from "react-hook-form";
-import { UserContext } from "@/utils";
+import { UserContext, ThemeContext } from "@/utils";
 import { getRandomQuote } from "@/utils/quotes";
 
 import FormItem from "antd/es/form/FormItem";
@@ -44,6 +44,8 @@ export default function Login() {
   const router = useRouter();
 
   const { updateUserId } = useContext(UserContext)!;
+
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
   const [quote, setQuote] = useState("");
 
   useEffect(() => {

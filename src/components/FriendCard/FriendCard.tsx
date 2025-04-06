@@ -12,8 +12,12 @@ import style from "./FriendCard.module.css";
 import { IUser } from "@/types";
 import { Poppins } from "@/fonts";
 import classNames from "classnames";
-import Image from "next/image";
-import { UserContext, generateRandomColor } from "@/utils";
+import {
+  UserContext,
+  generateRandomColorLight,
+  generateRandomColorDark,
+  ThemeContext,
+} from "@/utils";
 import { API_URL, BASE_API_URL } from "@/constants";
 import { useRouter } from "next/navigation";
 
@@ -41,9 +45,14 @@ export const FriendCard: FC<FriendCardProps> = ({
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { currentUserId } = useContext(UserContext)!;
+
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+
   const bgColor: string = useMemo(() => {
-    return generateRandomColor();
-  }, []);
+    return currentTheme === "light"
+      ? generateRandomColorLight()
+      : generateRandomColorDark();
+  }, [currentTheme]);
 
   const addFriendReq = useCallback(
     async (friend_id: number, id: number) => {
@@ -132,6 +141,15 @@ export const FriendCard: FC<FriendCardProps> = ({
     router.replace(`/friends/${id}`);
   }, [router, id]);
 
+  const deleteFriendThemeClassName = useMemo(() => {
+    return "deleteFriendButton-" + currentTheme;
+  }, [currentTheme]);
+
+  const addFriendThemeClassName = useMemo(() => {
+    return "addFriendButton-" + currentTheme;
+  }, [currentTheme]);
+
+
   return (
     <div
       className={classNames(style.card, {
@@ -145,8 +163,8 @@ export const FriendCard: FC<FriendCardProps> = ({
           <Avatar
             src={`${BASE_API_URL}/avatars/${avatarUrl}`}
             alt={`${name} image`}
-            size={96} 
-            style={{ borderRadius: "5px" }} 
+            size={96}
+            style={{ borderRadius: "5px" }}
           />
         </div>
       ) : (
@@ -164,7 +182,7 @@ export const FriendCard: FC<FriendCardProps> = ({
               event.stopPropagation();
               deleteFriend(id);
             }}
-            className={classNames(style.deleteFriendButton, Poppins.className)}
+            className={classNames(style.deleteFriendButton, style[deleteFriendThemeClassName], Poppins.className)}
           >
             Delete
           </button>
@@ -176,7 +194,7 @@ export const FriendCard: FC<FriendCardProps> = ({
               event.stopPropagation();
               addFriend(id);
             }}
-            className={classNames(style.addFriendButton, Poppins.className)}
+            className={classNames(style.addFriendButton, style[addFriendThemeClassName], Poppins.className)}
           >
             Add
           </button>

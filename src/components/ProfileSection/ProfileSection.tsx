@@ -15,7 +15,7 @@ import { Poppins } from "@/fonts";
 // import Image from "next/image";
 import { API_URL, BASE_API_URL } from "@/constants";
 import { IUser } from "@/types";
-import { UserContext } from "@/utils";
+import { ThemeContext, UserContext } from "@/utils";
 
 import { Avatar, Space, Typography, Flex, Button, Input, Upload } from "antd";
 import { cssTransition } from "react-toastify";
@@ -45,6 +45,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
   const [avatar, setAvatar] = useState<string>(avatarUrl ? avatarUrl : "");
   const [isInfoRed, setIsInfoRed] = useState<boolean>(false);
   const [newVal, setNewVal] = useState<string>(info ? info : "");
+  const { currentTheme } = useContext(ThemeContext);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -139,7 +140,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
           level={3}
           style={{
             fontSize: "48px",
-            color: "white",
+            color: currentTheme === "dark" ? "white" : "black",
             marginBottom: "0px",
           }}
           className={classNames(style.title, Poppins.className)}
@@ -160,8 +161,11 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
               <Button
                 className={style.btn}
                 style={{
-                  borderRadius: "25px",
-                  backgroundColor: "rgba(43, 19, 19, 0.7)",
+                  borderRadius: '25px',
+                  backgroundColor:
+                    currentTheme === "dark"
+                      ? "#ff767566"
+                      : "rgba(43, 19, 19, 0.7)",
                   color: "white",
                   border: "none",
                 }}
@@ -183,7 +187,10 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
                   className={style.btn}
                   style={{
                     borderRadius: "25px",
-                    backgroundColor: "rgba(43, 19, 19, 0.7)",
+                    backgroundColor:
+                      currentTheme === "dark"
+                        ? "#ff767566"
+                        : "rgba(43, 19, 19, 0.7)",
                     color: "white",
                     border: "none",
                   }}
@@ -200,7 +207,10 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
                   className={style.btn}
                   style={{
                     borderRadius: "25px",
-                    backgroundColor: "rgba(43, 19, 19, 0.7)",
+                    backgroundColor:
+                      currentTheme === "dark"
+                        ? "#ff767566"
+                        : "rgba(43, 19, 19, 0.7)",
                     color: "white",
                     border: "none",
                   }}
@@ -221,12 +231,16 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
               className={classNames(Poppins.className, style.info)}
             >
               <Space style={{ fontSize: "20px", fontWeight: "700" }}>
-                About me:  
+                About me:
               </Space>
               {""}
               <Text
                 strong
-                style={{ color: "rgba(43, 19, 19, 0.7)", fontSize: "16px" }}
+                style={{
+                  color:
+                    currentTheme === "dark" ? "#fab1a0" : "rgba(43, 19, 19)",
+                  fontSize: "16px",
+                }}
               >
                 {" "}
                 {info}{" "}
@@ -236,6 +250,14 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
 
           {isInfoRed && (
             <TextArea
+              style={{
+                backgroundColor:
+                  currentTheme === "dark"
+                    ? "#fab1a066"
+                    : "rgba(43, 19, 19, 0.2)",
+                color: "white",
+                border: "none",
+              }}
               value={newVal}
               onChange={(e) => setNewVal(e.target.value)}
               className={style.textarea}
@@ -251,7 +273,10 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
               className={style.btn}
               style={{
                 borderRadius: "25px",
-                backgroundColor: "rgba(43, 19, 19, 0.7)",
+                backgroundColor:
+                  currentTheme === "dark"
+                    ? "#ff767566"
+                    : "rgba(43, 19, 19, 0.7)",
                 color: "white",
                 border: "none",
               }}
@@ -264,6 +289,14 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
             <div className={style.redInfo}>
               <Button
                 className={style.btn}
+                style={{
+                  backgroundColor:
+                    currentTheme === "dark"
+                      ? "#ff767566"
+                      : "rgba(43, 19, 19, 0.7)",
+                  color: "white",
+                  border: "none",
+                }}
                 onClick={() => {
                   if (currentUserId) {
                     changeInfo(currentUserId);
@@ -274,6 +307,14 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
               </Button>
               <Button
                 className={style.btn}
+                style={{
+                  backgroundColor:
+                    currentTheme === "dark"
+                      ? "#ff767566"
+                      : "rgba(43, 19, 19, 0.7)",
+                  color: "white",
+                  border: "none",
+                }}
                 onClick={() => {
                   setIsInfoRed(false);
 
@@ -289,23 +330,32 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
         </Flex>
 
         {!isFriend && onAddFriend && (
-          <Button className={style.friendButton} onClick={onAddFriend}  style={{
-            borderRadius: "25px",
-            backgroundColor: "rgba(43, 19, 19, 0.7)",
-            color: "white",
-            border: "none",
-          }}>
+          <Button
+            className={style.friendButton}
+            onClick={onAddFriend}
+            style={{
+              borderRadius: "25px",
+              backgroundColor:
+                currentTheme === "dark" ? "#ff767566" : "rgba(43, 19, 19, 0.7)",
+              color: "white",
+              border: "none",
+            }}
+          >
             Add friend
           </Button>
         )}
 
         {isFriend && onRemoveFriend && (
-          <Button className={style.friendButton} onClick={onRemoveFriend}  style={{
-            borderRadius: "25px",
-            backgroundColor: "rgba(43, 19, 19, 0.7)",
-            color: "white",
-            border: "none",
-          }}>
+          <Button
+            className={style.friendButton}
+            onClick={onRemoveFriend}
+            style={{
+              borderRadius: "25px",
+              backgroundColor: "rgba(43, 19, 19, 0.7)",
+              color: "white",
+              border: "none",
+            }}
+          >
             Remove friend
           </Button>
         )}

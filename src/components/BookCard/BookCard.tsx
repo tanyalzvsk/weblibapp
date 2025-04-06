@@ -13,8 +13,12 @@ import { IBook } from "@/types";
 import { Poppins } from "@/fonts";
 import classNames from "classnames";
 import { useRouter } from "next/navigation";
-import { UserContext, generateRandomColor } from "@/utils";
-//import Image from "next/image";
+import {
+  UserContext,
+  generateRandomColorLight,
+  generateRandomColorDark,
+  ThemeContext,
+} from "@/utils";
 import { API_URL, API_USER_ID, BASE_API_URL } from "@/constants";
 import { useAuthCheck } from "@/utils";
 
@@ -68,9 +72,13 @@ export const BookCard: FC<BookCardProps> = ({
     router.replace(`/book/${book_id}`);
   }, [router, book_id]);
 
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+
   const bgColor: string = useMemo(() => {
-    return generateRandomColor();
-  }, []);
+    return currentTheme === "light"
+      ? generateRandomColorLight()
+      : generateRandomColorDark();
+  }, [currentTheme]);
 
   const { currentUserId } = useContext(UserContext)!;
 

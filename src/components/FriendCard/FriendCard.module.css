@@ -45,7 +45,6 @@
 
 .deleteFriendButton {
   border-radius: 25px;
-  background-color: rgb(221, 163, 200, 0.7);
   border: none;
   padding: 10px;
   width: 160px;
@@ -54,16 +53,29 @@
   font-weight: 700;
   transition: 0.3s;
 }
+.deleteFriendButton-light {
+  background-color: rgb(221, 163, 200, 0.7);
+}
 
-.deleteFriendButton:hover {
+.deleteFriendButton-dark {
+background-color: #e1705599;
+
+}
+
+.deleteFriendButton-light:hover {
   cursor: pointer;
   background-color: rgb(221, 163, 200, 0.9);
+}
+
+.deleteFriendButton-dark:hover {
+  cursor: pointer;
+  background-color: #e17055CC;
 }
 
 .addFriendButton {
   border-radius: 25px;
   background-color: rgba(149, 232, 134, 0.7);
-  border: 1px solid rgb(43, 19, 19, 0.7);
+  border: none;
   padding: 10px;
   width: 160px;
   height: 50px;

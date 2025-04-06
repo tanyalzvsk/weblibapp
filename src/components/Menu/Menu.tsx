@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, Fragment, useContext, useState } from "react";
+import { FC, Fragment, useContext, useMemo, useState } from "react";
 import style from "./Menu.module.css";
 
 import { IMenuItem } from "@/types";
@@ -14,9 +14,13 @@ import userIcon from "../../../public/user.svg";
 import stackIcon from "../../../public/stack.svg";
 import menuIcon from "../../../public/menu.svg";
 import quitIcon from "../../../public/quit.svg";
+import moonIcon from "../../../public/moon.svg";
 import classNames from "classnames";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/utils";
+import { ThemeContext } from "@/utils/ThemeContext";
+
+import { Switch, Flex, Avatar, Space } from "antd";
 
 const menuItems: IMenuItem[] = [
   {
@@ -53,10 +57,11 @@ export interface MenuProps {
 export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(true);
+  const [modalIsOpen, setIsModalOpen] = useState<boolean>(false);
+  const [ellipsis, setEllipsis] = useState(true);
 
   const { updateUserId } = useContext(UserContext)!;
-
-  const [modalIsOpen, setIsModalOpen] = useState(false);
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
 
   function openModal() {
     setIsModalOpen(true);
@@ -81,12 +86,16 @@ export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
     },
   ];
 
+  const menuThemeClassName = useMemo(() => {
+    return "menu-" + currentTheme;
+  }, [currentTheme]);
+
   return (
     <Fragment>
       <div className={style.fakeMenu}></div>
 
       <div
-        className={classNames(style.menu, {
+        className={classNames(style.menu, style[menuThemeClassName], {
           [style.isOpen]: isOpen,
         })}
         onMouseEnter={() => {
@@ -108,6 +117,23 @@ export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
         </div>
 
         <div className={style.menuItemsWrapper}>
+          <Flex
+            gap={26}
+            align="center"
+            justify="flex-start"
+            style={{ marginLeft: "10px" }}
+          >
+            <Space size={25} wrap>
+              <Avatar src={moonIcon.src}></Avatar>
+            </Space>
+
+            <Switch
+             
+              checked={currentTheme === "dark"}
+              onChange={toggleTheme}
+            ></Switch>
+          </Flex>
+
           {buttonMenuItems.map((item) => (
             <MenuItem key={item.name} {...item} isOnlyIcon={!isOpen} />
           ))}
@@ -132,8 +158,8 @@ export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
         </h2>
 
         <div className={style.buttonsWrapper}>
-          {" "}
-          <button className={classNames(style.quitButton,Poppins.className)}
+          <button
+            className={classNames(style.quitButton, Poppins.className)}
             onClick={() => {
               if (typeof window !== "undefined") {
                 window.localStorage.removeItem("user_id");
@@ -148,7 +174,12 @@ export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
           >
             Yes
           </button>
-          <button className={classNames(style.quitButton, Poppins.className)} onClick={closeModal}>No</button>{" "}
+          <button
+            className={classNames(style.quitButton, Poppins.className)}
+            onClick={closeModal}
+          >
+            No
+          </button>
         </div>
       </Modal>
     </Fragment>

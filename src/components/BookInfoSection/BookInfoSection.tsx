@@ -20,12 +20,13 @@ export const BookInfoSection: FC<BookInfoSectionProps> = ({
 }) => {
   const [currentRate, setCurrentRate] = useState<Rating | number>(rate);
   const [ellipsis, setEllipsis] = useState(true);
+  
 
   return (
     <div className={style.section}>
       <div className={style.content}>
         <div className={style.info}>
-          <Title style = {{color : "white"}} className={classNames(style.title, Poppins.className)}>
+          <Title style = {{color : "white", fontSize: "60px", fontWeight: '700'}} className={classNames(style.title, Poppins.className)}>
             {name}
           </Title>
 

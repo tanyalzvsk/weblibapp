@@ -32,7 +32,7 @@ div > .title {
   color: white;
 }
 
-div > button.loginButton {
+button.loginButton {
   width: fit-content;
   padding: 5px 28px;
   color: white;

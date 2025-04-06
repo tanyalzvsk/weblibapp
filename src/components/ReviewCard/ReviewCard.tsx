@@ -1,11 +1,15 @@
 "use client";
 
-import { FC, useCallback, useMemo } from "react";
+import { FC, useCallback, useMemo, useContext } from "react";
 import style from "./ReviewCard.module.css";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
 import { IReview } from "@/types";
-import { generateRandomColor } from "@/utils";
+import {
+  generateRandomColorLight,
+  generateRandomColorDark,
+  ThemeContext,
+} from "@/utils";
 import { useRouter } from "next/navigation";
 import { Pages } from "@/constants";
 
@@ -21,9 +25,13 @@ export const ReviewCard: FC<ReviewCardProps> = ({
   book_name = "",
   backgroundColor = "",
 }) => {
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+
   const bgColor: string = useMemo(() => {
-    return generateRandomColor();
-  }, []);
+    return currentTheme === "light"
+      ? generateRandomColorLight()
+      : generateRandomColorDark();
+  }, [currentTheme]);
 
   const router = useRouter();
 

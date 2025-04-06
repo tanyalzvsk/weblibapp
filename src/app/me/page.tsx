@@ -20,11 +20,11 @@ import { Poppins } from "@/fonts";
 import { API_URL, API_USER_ID, enabledFilters, filtersType } from "@/constants";
 import { IBook, ICollection, IReview, IUser } from "@/types";
 import { FriendCard } from "@/components/FriendCard";
-import { UserContext, useAuthCheck } from "@/utils";
+import { UserContext, useAuthCheck, ThemeContext } from "@/utils";
 import { getMonthName } from "@/utils";
 import { useRouter } from "next/navigation";
 
-import { Avatar, Typography, Tabs, Flex } from 'antd';
+import { Avatar, Typography, Tabs, Flex } from "antd";
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -42,6 +42,8 @@ export default function Me() {
   const [friends, setFriends] = useState<IUser[]>([]);
   const [collections, setCollections] = useState<ICollection[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+
   const [me, setMe] = useState<Me>({
     id: 1,
     info: "",
@@ -52,6 +54,8 @@ export default function Me() {
   const { currentUserId } = useContext(UserContext)!;
 
   useAuthCheck(router);
+
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
 
   const loadMe = useCallback(async (id: number) => {
     const meResponse = await fetch(`${API_URL}/user`, {
@@ -145,7 +149,6 @@ export default function Me() {
 
   const loadCollectionsData = useCallback(
     async (id: number) => {
-      //change USER id to user RN
       const collectionsResponse = await fetch(
         `${API_URL}/all_user_collections`,
         {
@@ -330,98 +333,6 @@ export default function Me() {
 
       <Flex className={style.pageContent}>
         <ProfileSection {...me} onChangeInfo={changeInfoSuccessHandler} isMe />
-
-        {/* <div className={style.tabsWrapper}>
-          {enabledFilters.map((item) => (
-            <div
-              key={item}
-              className={classNames(style.tab, {
-                [style.selected]: filter === item,
-              })}
-              onClick={() => {
-                if (filter !== item) {
-                  setFilter(item);
-                  loadCurrentBooks(item);
-                }
-              }}
-            >
-              <p className={classNames(style.tabTitle, Poppins.className)}>
-                {item}
-              </p>
-            </div>
-          ))}
-        </div>
-  */}
-        {/* <div className={style.mainContent}>
-          {filter === "read" &&
-            books.map((item) => <BookCard key={item.book_id} {...item} />)}
-
-          {filter === "reading" &&
-            books.map((item) => <BookCard key={item.book_id} {...item} />)}
-
-          {filter === "completed" &&
-            books
-              .sort((a, b) => {
-                if (a.date && b.date) {
-                  const dateA = new Date(a.date);
-                  const dateB = new Date(b.date);
-
-                  return dateA.getTime() - dateB.getTime();
-                }
-
-                return 0;
-              })
-              .map((book) => {
-                if (!book.date) {
-                  return;
-                }
-                const month = +book.date.substr(5, 2);
-                if (currentMonth !== month) {
-                  currentMonth = month;
-                  return (
-                    <div key={month} className={style.monthAndBooksContainer}>
-                      <h1
-                        className={classNames(
-                          style.monthTitle,
-                          Poppins.className
-                        )}
-                      >
-                        {getMonthName(month)}
-                      </h1>
-                      <div className={style.booksContainer}>
-                        <BookCard key={book.book_id} {...book} />{" "}
-                      </div>
-                    </div>
-                  );
-                }
-
-                return <BookCard key={book.book_id} {...book} />;
-              })}
-
-          {filter === "reviews" &&
-            reviews.map((review) => (
-              <ReviewCard key={review.review_id} {...review} />
-            ))}
-
-          {filter === "collections" &&
-            collections.map((collection) => (
-              <CollectionCard key={collection.id} {...collection} />
-            ))}
-
-          {filter === "friends" &&
-            friends.map((friend) => (
-              <FriendCard
-                isFriend
-                key={friend.id + friend.name}
-                onSuccess={(id) =>
-                  setFriends((friends) =>
-                    friends.filter((friend) => friend.id !== id)
-                  )
-                }
-                {...friend}
-              />
-            ))}
-        </div> */}
 
         <Tabs
           defaultActiveKey="read"

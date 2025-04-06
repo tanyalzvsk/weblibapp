@@ -1,25 +1,40 @@
 "use client";
 
-import React, { ReactNode, createContext, useState } from "react";
+import React, {
+  createContext,
+  useState,
+  ReactNode,
+  useCallback,
+  useEffect,
+} from "react";
+
+type ThemeType = "dark" | "light";
 
 interface ThemeContextProps {
-  isDark: boolean;
+  currentTheme: ThemeType;
   toggleTheme: () => void;
 }
 
-export const ThemeContext = createContext<ThemeContextProps | undefined>(
-  undefined
-);
-
+export const ThemeContext = createContext<ThemeContextProps>({
+  currentTheme: "light",
+  toggleTheme: () => {},
+});
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [isDark, setIsDark] = useState(false);
-  const toggleTheme = () => setIsDark((prev) => !prev);
+  const [theme, setTheme] = useState<ThemeType>("light");
+
+  const toggleTheme = useCallback(() => {
+    theme === "light" ? setTheme("dark") : setTheme("light");
+  }, [theme]);
+
+  useEffect(() => {
+    console.log("theme: ", theme);
+  }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ currentTheme: theme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

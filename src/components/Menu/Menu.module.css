@@ -12,13 +12,20 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: rgba(85, 79, 107, 0.4);
   border-radius: 25px;
   height: calc(100dvh - 100px);
   transition: 0.1s all;
   z-index: 5;
   overflow: hidden;
   backdrop-filter: blur(20px);
+}
+
+.menu-light {
+  background-color: rgba(85, 79, 107, 0.4);
+}
+
+.menu-dark {
+  background-color:#636e7266;
 }
 
 .menu:hover {
@@ -52,9 +59,8 @@
 }
 
 .buttonsWrapper {
- display: flex;
- gap: 20px;
-  
+  display: flex;
+  gap: 20px;
 }
 
 .quitButton {

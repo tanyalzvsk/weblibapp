@@ -12,7 +12,7 @@ import { IBook, ICollection, IReview } from "@/types";
 import { useParams } from "next/navigation";
 import { WriteReviewButton } from "@/components/WriteReviewButton";
 import ReviewForm from "@/components/ReviewForm/ReviewForm";
-import { Avatar, Space, Upload, Typography, Card, Flex, Tabs } from "antd";
+import { Typography, Card, Flex, Tabs } from "antd";
 
 const { Title, Text } = Typography;
 

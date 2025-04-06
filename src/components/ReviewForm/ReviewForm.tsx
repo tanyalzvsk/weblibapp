@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState, useMemo } from "react";
 import style from "./ReviewForm.module.css";
 import { BookRate } from "../BookRate";
 import classNames from "classnames";
@@ -11,7 +11,7 @@ import {
 } from "react-hook-form";
 import { API_URL, API_USER_ID } from "@/constants";
 import { Bounce, toast } from "react-toastify";
-import { UserContext } from "@/utils";
+import { UserContext, ThemeContext } from "@/utils";
 
 export type Rating = 1 | 2 | 3 | 4 | 5;
 
@@ -46,6 +46,7 @@ const customRes: Resolver<ReviewFormValues> = async (values) => {
 };
 
 const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
   const { handleSubmit, register, formState } = useForm<ReviewFormValues>({
     resolver: customRes,
   });
@@ -59,7 +60,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
   const handleFormSubmit: SubmitHandler<ReviewFormValues> = useCallback(
     async ({ review, reviewTitle }) => {
       console.log("here");
-      
+
       if (!formState.isValid) {
         toast("Form is invalid! Check the data", {
           autoClose: 3000,
@@ -105,10 +106,17 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
     },
     [formState.isValid, onSuccess, rate, currentUserId]
   );
+  const reviewThemeClassName = useMemo(() => {
+    return "review-" + currentTheme;
+  }, [currentTheme]);
+  const titleThemeClassName = useMemo(() => {
+    return "formTitle-" + currentTheme;
+  }, [currentTheme]);
+
 
   return (
-    <div className={style.review}>
-      <div className={classNames(style.formTitle, style.titleOfForm)}>
+    <div className={classNames(style.review, style[reviewThemeClassName])}>
+      <div className={classNames(style.formTitle, style.titleOfForm, style[titleThemeClassName])}>
         <h2 className={classNames(style.formHeaders, Poppins.className)}>
           Your review
         </h2>

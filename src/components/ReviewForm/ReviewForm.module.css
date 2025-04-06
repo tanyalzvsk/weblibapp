@@ -1,20 +1,34 @@
 .review {
   display: flex;
   flex-direction: column;
-  background-color: rgb(43, 19, 19, 0.8);
   border-radius: 25px;
   justify-content: center;
   align-items: center;
   gap: 20px;
-
   padding: 20px;
+}
+
+.review-light {
+  background-color: rgb(43, 19, 19, 0.6);
+}
+
+.review-dark {
+  background-color: #636e7266;
 }
 
 .formTitle {
   width: 90%;
-  background-color: rgb(43, 19, 19, 0.8);
+
   border-radius: 25px;
   text-align: center;
+}
+
+.formTitle-light {
+  background-color: rgb(43, 19, 19, 0.8);
+}
+
+.formTitle-dark {
+  background-color: #636e7266;
 }
 
 .reviewInfo {

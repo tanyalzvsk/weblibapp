@@ -13,12 +13,14 @@ import style from "./page.module.css";
 
 import background from "../../public/page-background-main.png";
 import { API_URL, reviews } from "@/constants";
+
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { IBook, ICollection } from "@/types";
-import { UserContext, useAuthCheck } from "@/utils";
+import { ThemeContext, UserContext, useAuthCheck} from "@/utils";
 import { useRouter } from "next/navigation";
 import { ISearchData } from "@/types/SearchData";
 import { FriendCard } from "@/components/FriendCard";
+
 
 export default function Home() {
   const [books, setBooks] = useState<IBook[]>([]);
@@ -26,6 +28,8 @@ export default function Home() {
   const [searchData, setSearchData] = useState<ISearchData>();
 
   const { currentUserId } = useContext(UserContext)!;
+
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
 
   const router = useRouter();
 
@@ -110,10 +114,14 @@ export default function Home() {
     return res;
   });
 
+  const menuThemeClassName = useMemo(() => {
+    return "main-" + currentTheme;
+  }, [currentTheme]);
+  
+
   return (
     <PageWrapper backgroundSrc={background.src} className={style.page}>
       <Menu />
-
       <div className={style.pageContent}>
         <Search handleDateChange={(data) => setSearchData(data)} />
 

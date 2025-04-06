@@ -42,6 +42,14 @@
   padding: 20px;
 }
 
+.challenge-light {
+  background-color: rgb(43, 19, 19, 0.8);
+}
+
+.challenge-dark {
+  background-color: #fab1a066;
+}
+
 .mainContent {
   width: 100%;
 }
@@ -80,7 +88,7 @@
 .challengeSendButton {
   border-radius: 25px;
   background-color: #dda3c899;
-  border: 1px solid rgb(43, 19, 19, 0.7);
+  border: none;
   padding: 10px;
   width: 160px;
   height: 50px;
@@ -91,7 +99,7 @@
 
 .challengeSendButton:hover {
   cursor: pointer;
-  background-color: rgb(43, 19, 19, 0.8);
+  background-color: #dda3c8;
 }
 
 .friendChallenge {
@@ -102,8 +110,16 @@
   flex-direction: column;
   gap: 10px;
   align-items: center;
-  background-color: rgb(43, 19, 19, 0.5);
   border-radius: 25px;
+}
+
+.friendChallenge-light {
+  background-color: rgb(43, 19, 19, 0.5);
+}
+
+
+.friendChallenge-dark {
+  background-color: #fab1a066;
 }
 
 .friendChallengeRating {
