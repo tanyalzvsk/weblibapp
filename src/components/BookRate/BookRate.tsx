@@ -10,7 +10,7 @@ export interface BookRateProps {
 
 export const BookRate: FC<BookRateProps> = ({ onRateChange }) => {
   const [myRate, setMyRate] = useState<number>(1);
-  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+  const { currentTheme } = useContext(ThemeContext);
   useEffect(() => {
     const savedRate = localStorage.getItem("userBookRating");
 

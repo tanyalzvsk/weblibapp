@@ -1,24 +1,15 @@
 "use client";
 
-import {
-  ChangeEvent,
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { FC, useCallback, useContext, useEffect, useState } from "react";
 import style from "./ProfileSection.module.css";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
-// import Image from "next/image";
 import { API_URL, BASE_API_URL } from "@/constants";
 import { IUser } from "@/types";
 import { ThemeContext, UserContext } from "@/utils";
 
 import { Avatar, Space, Typography, Flex, Button, Input, Upload } from "antd";
-import { cssTransition } from "react-toastify";
+import { toast, Bounce } from "react-toastify";
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
@@ -47,12 +38,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
   const [newVal, setNewVal] = useState<string>(info ? info : "");
   const { currentTheme } = useContext(ThemeContext);
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
-    }
-  };
-  const { currentUserId } = useContext(UserContext)!;
+  const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
 
   const handleUpload = async () => {
     if (selectedFile && currentUserId) {
@@ -81,6 +67,8 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication:  accessToken || '',
+          LibRefreshAuthentication: refreshToken || '',
         },
         body: JSON.stringify({
           user_id: id,
@@ -88,7 +76,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
         }),
       });
 
-      const changeInfoData: { success: boolean; info: string } =
+      const changeInfoData: { success: boolean; message: string; info: string } =
         await changeInfoReq.json();
 
       if (changeInfoData.success) {
@@ -97,11 +85,19 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
           setIsInfoRed(false);
           setNewVal(changeInfoData.info);
         }
+        else {
+          toast(changeInfoData.message, {
+            autoClose: 2000,
+            transition: Bounce,
+            closeOnClick: true,
+            type: "error",
+          });
+        }
       }
 
       console.log("change info ", changeInfoData);
     },
-    [newVal, onChangeInfo]
+    [newVal, onChangeInfo, accessToken, refreshToken]
   );
 
   useEffect(() => {
@@ -115,14 +111,6 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
       setNewVal(info);
     }
   }, [info]);
-
-  const ref = useRef<HTMLInputElement | null>(null);
-
-  const handleChangeAvatar = () => {
-    if (ref.current) {
-      ref.current.click();
-    }
-  };
 
   return (
     <section className={style.section}>
@@ -153,7 +141,6 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
             <Upload
               beforeUpload={(file) => {
                 setSelectedFile(file);
-                return false;
               }}
               showUploadList={false}
               accept="image/*"
@@ -161,7 +148,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
               <Button
                 className={style.btn}
                 style={{
-                  borderRadius: '25px',
+                  borderRadius: "25px",
                   backgroundColor:
                     currentTheme === "dark"
                       ? "#ff767566"
@@ -232,8 +219,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
             >
               <Space style={{ fontSize: "20px", fontWeight: "700" }}>
                 About me:
-              </Space>
-              {""}
+              </Space>{" "}
               <Text
                 strong
                 style={{
@@ -242,8 +228,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({
                   fontSize: "16px",
                 }}
               >
-                {" "}
-                {info}{" "}
+                {info}
               </Text>
             </Text>
           )}

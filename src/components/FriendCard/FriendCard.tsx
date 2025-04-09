@@ -5,7 +5,6 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useEffect,
   useState,
 } from "react";
 import style from "./FriendCard.module.css";
@@ -46,7 +45,7 @@ export const FriendCard: FC<FriendCardProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { currentUserId } = useContext(UserContext)!;
 
-  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+  const { currentTheme } = useContext(ThemeContext);
 
   const bgColor: string = useMemo(() => {
     return currentTheme === "light"

@@ -6,13 +6,15 @@ import style from "./page.module.css";
 import background from "../../../../public/page-background-main.png";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useContext } from "react";
 import { API_URL } from "@/constants";
 import { IBook, ICollection, IReview } from "@/types";
 import { useParams } from "next/navigation";
 import { WriteReviewButton } from "@/components/WriteReviewButton";
 import ReviewForm from "@/components/ReviewForm/ReviewForm";
 import { Typography, Card, Flex, Tabs } from "antd";
+import { UserContext } from "@/utils";
+import { Bounce, toast } from "react-toastify";
 
 const { Title, Text } = Typography;
 
@@ -24,39 +26,63 @@ export default function BookPage() {
   const params = useParams<{ id: string }>();
   const [isReviewFormVisible, setIsReviewFormVisible] =
     useState<boolean>(false);
+  const { accessToken, refreshToken } = useContext(UserContext)!;
 
   const loadReviews = useCallback(async () => {
     const reviewResponse = await fetch(`${API_URL}/reviews`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        LibAuthentication: accessToken || "",
+        LibRefreshAuthentication: refreshToken || "",
       },
       body: JSON.stringify({
         book_id: params.id,
       }),
     });
 
-    const reviewData: { success: boolean; reviews?: IReview[] } =
+    const reviewData: { success: boolean; message?: string; reviews?: IReview[] } =
       await reviewResponse.json();
 
-    if (reviewData.success && reviewData.reviews) {
+    if (!reviewData.success && reviewData.reviews) {
       setReviews(reviewData.reviews);
+    } else {
+      toast(reviewData.message, {
+        autoClose: 2000,
+        transition: Bounce,
+        closeOnClick: true,
+        type: "error",
+      });
+      return;
     }
-  }, [params.id]);
+  }, [params.id, accessToken, refreshToken]);
 
   const loadBook = useCallback(async () => {
     const bookResponse = await fetch(`${API_URL}/search/id`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        LibAuthentication: accessToken || "",
+        LibRefreshAuthentication: refreshToken || "",
       },
       body: JSON.stringify(`${params.id}`),
     });
 
     const bookData: IBook = await bookResponse.json();
+
+    if (!bookData.success && bookData.message) {
+      toast(bookData.message, {
+        autoClose: 2000,
+        transition: Bounce,
+        closeOnClick: true,
+        type: "error",
+      });
+
+      return;
+    }
     setBook(bookData);
     loadReviews();
-  }, [loadReviews, params.id]);
+  }, [loadReviews, params.id, accessToken, refreshToken]);
 
   useEffect(() => {
     loadBook();
@@ -86,22 +112,28 @@ export default function BookPage() {
           onChange={setFilter}
           className={style.tabsWrapper}
           type="card"
-          style={{ color: 'white' }}
+          style={{ color: "white" }}
           tabBarStyle={{
             padding: "16px 18px",
             borderRadius: "25px 0 25px 0",
             transition: "0.3s",
-            
           }}
-          items={ [
+          items={[
             {
               key: "reviews",
-              label: (<span style={{ color: filter === "reviews" ? 'rgba(43, 19, 19, 0.7)' : 'white ', fontSize: '18px'}}> 
-                reviews
-              </span>),
-              
+              label: (
+                <span
+                  style={{
+                    color:
+                      filter === "reviews" ? "rgba(43, 19, 19, 0.7)" : "white ",
+                    fontSize: "18px",
+                  }}
+                >
+                  reviews
+                </span>
+              ),
+
               children: (
-                
                 <Flex gap={20}>
                   <WriteReviewButton
                     handleClick={() =>
@@ -117,9 +149,19 @@ export default function BookPage() {
             },
             {
               key: "collections",
-              label:(<span style={{ color: filter === "collections" ? 'rgba(43, 19, 19, 0.7)' : 'white ', fontSize: '18px'}}> 
-                collections
-              </span>),
+              label: (
+                <span
+                  style={{
+                    color:
+                      filter === "collections"
+                        ? "rgba(43, 19, 19, 0.7)"
+                        : "white ",
+                    fontSize: "18px",
+                  }}
+                >
+                  collections
+                </span>
+              ),
               children: (
                 <Flex gap={20}>
                   <Title level={2} style={{ color: "white" }}>
@@ -130,9 +172,17 @@ export default function BookPage() {
             },
             {
               key: "quotes",
-              label: (<span style={{ color: filter === "quotes" ? 'rgba(43, 19, 19, 0.7)' : 'white ', fontSize: '18px'}}> 
-                quotes
-              </span>),
+              label: (
+                <span
+                  style={{
+                    color:
+                      filter === "quotes" ? "rgba(43, 19, 19, 0.7)" : "white ",
+                    fontSize: "18px",
+                  }}
+                >
+                  quotes
+                </span>
+              ),
               children: (
                 <Flex gap={20}>
                   {[1, 2, 3].map((item) => (

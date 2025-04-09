@@ -14,13 +14,16 @@ import classNames from "classnames";
 import { Poppins } from "@/fonts";
 import { API_URL } from "@/constants";
 import { IReview } from "@/types";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthCheck } from "@/utils";
+import { useAuthCheck, UserContext } from "@/utils";
+import { toast, Bounce } from "react-toastify";
 
 export default function Reviews() {
   const [reviews, setReviews] = useState<IReview[]>([]);
   const router = useRouter();
+
+  const { accessToken, refreshToken } = useContext(UserContext)!;
 
   useAuthCheck(router);
 
@@ -29,19 +32,30 @@ export default function Reviews() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        LibAuthentication:  accessToken || '',
+        LibRefreshAuthentication: refreshToken || '',
       },
       body: JSON.stringify(""),
     });
 
-    const reviewData: { success: boolean; reviews: IReview[] } =
+    const reviewData: { success: boolean; message: string; reviews: IReview[] } =
       await userReviewsResponse.json();
 
     console.log("review data", reviewData);
+    if (!reviewData.success && reviewData.message) {
+      toast(reviewData.message, {
+        autoClose: 2000,
+        transition: Bounce,
+        closeOnClick: true,
+        type: "error",
+      });
 
+      return;
+    }
     if (reviewData.success) {
       setReviews(reviewData.reviews);
     }
-  }, []);
+  }, [accessToken, refreshToken]);
 
   useEffect(() => {
     loadAllReviews();

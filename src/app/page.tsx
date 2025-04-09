@@ -16,20 +16,20 @@ import { API_URL, reviews } from "@/constants";
 
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { IBook, ICollection } from "@/types";
-import { ThemeContext, UserContext, useAuthCheck} from "@/utils";
+import { ThemeContext, UserContext, useAuthCheck } from "@/utils";
 import { useRouter } from "next/navigation";
 import { ISearchData } from "@/types/SearchData";
 import { FriendCard } from "@/components/FriendCard";
-
+import { Bounce, toast } from "react-toastify";
 
 export default function Home() {
   const [books, setBooks] = useState<IBook[]>([]);
   const [collections, setCollections] = useState<ICollection[]>([]);
   const [searchData, setSearchData] = useState<ISearchData>();
 
-  const { currentUserId } = useContext(UserContext)!;
+  const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
 
-  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+  const { currentTheme } = useContext(ThemeContext);
 
   const router = useRouter();
 
@@ -40,6 +40,8 @@ export default function Home() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        LibAuthentication:  accessToken || '',
+        LibRefreshAuthentication: refreshToken || '',
       },
       body: JSON.stringify({
         user_id: id,
@@ -48,10 +50,22 @@ export default function Home() {
 
     const collectionsData = await collectionsResponse.json();
 
+
+    if (!collectionsData.success && collectionsData.message) {
+      toast(collectionsData.message, {
+        autoClose: 2000,
+        transition: Bounce,
+        closeOnClick: true,
+        type: "error",
+      });
+
+      return;
+    }
+
     console.log("collections", collectionsData.collections);
 
     setCollections(collectionsData.collections);
-  }, []);
+  }, [accessToken, refreshToken]);
 
   const loadBooks = useCallback(
     async (id: number) => {
@@ -59,23 +73,45 @@ export default function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication:  accessToken || '',
+          LibRefreshAuthentication: refreshToken || '',
         },
         body: JSON.stringify({
           user_id: id,
         }),
       });
 
-      const booksData: IBook[] = await booksResponse.json();
+      const booksData = await booksResponse.json();
 
-      console.log("data", booksData);
+      console.log("api response:", booksData);
 
-      setBooks(booksData);
+      if (!booksData.success && booksData.message) {
+        toast(booksData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
+      }
+
+      if (Array.isArray(booksData)) {
+        setBooks(booksData);
+      } else {
+        toast("unexpected format of books", {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+      }
 
       if (currentUserId) {
         await loadCollections(currentUserId);
       }
     },
-    [loadCollections, currentUserId]
+    [loadCollections, currentUserId, accessToken, refreshToken]
   );
 
   useEffect(() => {
@@ -117,7 +153,6 @@ export default function Home() {
   const menuThemeClassName = useMemo(() => {
     return "main-" + currentTheme;
   }, [currentTheme]);
-  
 
   return (
     <PageWrapper backgroundSrc={background.src} className={style.page}>

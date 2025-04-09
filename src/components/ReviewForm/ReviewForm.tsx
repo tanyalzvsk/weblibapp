@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState, useMemo } from "react";
+import { useCallback, useContext, useState, useMemo } from "react";
 import style from "./ReviewForm.module.css";
 import { BookRate } from "../BookRate";
 import classNames from "classnames";
@@ -9,7 +9,7 @@ import {
   SubmitHandler,
   useForm,
 } from "react-hook-form";
-import { API_URL, API_USER_ID } from "@/constants";
+import { API_URL} from "@/constants";
 import { Bounce, toast } from "react-toastify";
 import { UserContext, ThemeContext } from "@/utils";
 

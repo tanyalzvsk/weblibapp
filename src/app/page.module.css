@@ -3,14 +3,6 @@
   gap: 34px;
 }
 
-.page-dark {
-  background-color: blue;
-}
-
-.page-light {
-  background-color: pink;
-}
-
 .pageContent {
   width: 100%;
   display: flex;

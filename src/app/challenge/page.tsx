@@ -14,7 +14,8 @@ import { UserContext, useAuthCheck, ThemeContext } from "@/utils";
 import { useRouter } from "next/navigation";
 import { IFriendChallenge } from "@/types";
 
-import { Progress, Space, Typography, Flex } from "antd";
+import { Progress, Typography, Flex } from "antd";
+import { toast, Bounce } from "react-toastify";
 const { Title } = Typography;
 
 export default function Challenge() {
@@ -29,64 +30,92 @@ export default function Challenge() {
   const [isChallengeFormVisible, setIsChallengeFormVisible] =
     useState<boolean>(false);
 
-  const { currentUserId } = useContext(UserContext)!;
-  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+  const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
+  const { currentTheme } = useContext(ThemeContext);
 
   const router = useRouter();
 
   useAuthCheck(router);
 
-  const loadUserChallenge = useCallback(async (id: number) => {
-    const challengeResponse = await fetch(`${API_URL}/book_challenge`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: id,
-      }),
-    });
-
-    const challengeData: {
-      success: boolean;
-      book_read: number;
-      book_want: number;
-      challenge_id: number;
-    } = await challengeResponse.json();
-
-    console.log("challengeData", challengeData.success);
-
-    if (challengeData.success) {
-      setChallenge(challengeData);
-    }
-  }, []);
-
-  const loadFriendsChallenge = useCallback(async (id: number) => {
-    const firendsChallengeResponse = await fetch(
-      `${API_URL}/book_challenge/friends`,
-      {
+  const loadUserChallenge = useCallback(
+    async (id: number) => {
+      const challengeResponse = await fetch(`${API_URL}/book_challenge`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           user_id: id,
         }),
+      });
+
+      const challengeData: {
+        message: string;
+        success: boolean;
+        book_read: number;
+        book_want: number;
+        challenge_id: number;
+      } = await challengeResponse.json();
+
+      console.log("challengeData", challengeData.success);
+
+      if (!challengeData.success && challengeData.message) {
+        toast(challengeData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
       }
-    );
 
-    const friendChallengeData: {
-      friend_challenges: IFriendChallenge[];
-      success: boolean;
-    } = await firendsChallengeResponse.json();
+      setChallenge(challengeData);
+    },
+    [accessToken, refreshToken]
+  );
 
-    console.log("challengeData", friendChallengeData.success);
+  const loadFriendsChallenge = useCallback(
+    async (id: number) => {
+      const friendsChallengeResponse = await fetch(
+        `${API_URL}/book_challenge/friends`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            LibAuthentication: accessToken || "",
+            LibRefreshAuthentication: refreshToken || "",
+          },
+          body: JSON.stringify({
+            user_id: id,
+          }),
+        }
+      );
 
-    if (friendChallengeData.success) {
+      const friendChallengeData: {
+        friend_challenges: IFriendChallenge[];
+        success: boolean;
+        message: string;
+      } = await friendsChallengeResponse.json();
+
+      console.log("challengeData", friendChallengeData.success);
+      if (!friendChallengeData.success && friendChallengeData.message) {
+        toast(friendChallengeData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
+      }
       setFriendsChallengeData(friendChallengeData.friend_challenges);
       console.log(friendChallengeData);
-    }
-  }, []);
+    },
+    [accessToken, refreshToken]
+  );
 
   useEffect(() => {
     if (currentUserId) {

@@ -9,7 +9,6 @@ import { ICollection } from "@/types";
 import Image from "next/image";
 import { BASE_API_URL } from "@/constants";
 import {
-  UserContext,
   generateRandomColorLight,
   generateRandomColorDark,
   ThemeContext,

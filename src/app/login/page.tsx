@@ -43,7 +43,7 @@ const resolver: Resolver<LoginValues> = async (values) => {
 export default function Login() {
   const router = useRouter();
 
-  const { updateUserId } = useContext(UserContext)!;
+  const { updateUserId, setAccess, setRefresh } = useContext(UserContext)!;
 
   const { currentTheme, toggleTheme } = useContext(ThemeContext);
   const [quote, setQuote] = useState("");
@@ -88,8 +88,13 @@ export default function Login() {
         }),
       });
 
-      const data: { success: boolean; userId?: number; message?: string } =
-        await response.json();
+      const data: {
+        success: boolean;
+        userId?: number;
+        message?: string;
+        lib_access_token?: string;
+        lib_refresh_token?: string;
+      } = await response.json();
 
       if (!data.success && data.message) {
         toast(data.message, {
@@ -104,16 +109,31 @@ export default function Login() {
 
       console.log("login data", data);
 
-      if (data.success && data.userId !== undefined) {
+      if (
+        data.success &&
+        data.userId !== undefined &&
+        data.lib_access_token &&
+        data.lib_refresh_token
+      ) {
         if (typeof window !== "undefined") {
           window.localStorage.setItem("user_id", `${data.userId}`);
+          window.localStorage.setItem(
+            "access_token",
+            `${data.lib_access_token}`
+          );
+          window.localStorage.setItem(
+            "refresh_token",
+            `${data.lib_refresh_token}`
+          );
         }
 
+        setAccess(data.lib_access_token);
+        setRefresh(data.lib_refresh_token);
         updateUserId(data.userId);
         router.push(Pages.main);
       }
     },
-    [formState.isValid, router, updateUserId]
+    [formState.isValid, router, updateUserId, setAccess, setRefresh]
   );
 
   const handleSignup = useCallback(() => {

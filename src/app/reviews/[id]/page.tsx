@@ -18,7 +18,6 @@ import { useState, useCallback, useEffect, useContext } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { UserContext, useAuthCheck } from "@/utils";
 import "../../../../public/heart.svg";
-import Image from "next/image";
 import { Bounce, toast } from "react-toastify";
 import { Avatar } from "antd";
 
@@ -46,7 +45,7 @@ export default function CurrentReviews() {
     return result;
   });
 
-  const { currentUserId } = useContext(UserContext)!;
+  const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
 
   const router = useRouter();
 
@@ -57,6 +56,9 @@ export default function CurrentReviews() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+
+        LibAuthentication: accessToken || "",
+        LibRefreshAuthentication: refreshToken || "",
       },
       body: JSON.stringify({
         review_id: params.id,
@@ -82,6 +84,9 @@ export default function CurrentReviews() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+
+        LibAuthentication: accessToken || "",
+        LibRefreshAuthentication: refreshToken || "",
       },
       body: JSON.stringify({
         review_id: params.id,
@@ -89,10 +94,23 @@ export default function CurrentReviews() {
       }),
     });
 
-    const reviewCommentsData: { success: boolean; comments: IReviewComment[] } =
-      await reviewCommentsResponse.json();
+    const reviewCommentsData: {
+      success: boolean;
+      message: string;
+      comments: IReviewComment[];
+    } = await reviewCommentsResponse.json();
 
     console.log("review data", reviewCommentsData);
+    if (!reviewCommentsData.success && reviewCommentsData.message) {
+      toast(reviewCommentsData.message, {
+        autoClose: 2000,
+        transition: Bounce,
+        closeOnClick: true,
+        type: "error",
+      });
+
+      return;
+    }
 
     if (reviewCommentsData.success) {
       setReviewComments(reviewCommentsData.comments);
@@ -105,7 +123,7 @@ export default function CurrentReviews() {
 
       setLikedData({ ...result });
     }
-  }, [currentUserId, params.id]);
+  }, [currentUserId, params.id, accessToken, refreshToken]);
 
   useEffect(() => {
     loadReview();
@@ -132,6 +150,9 @@ export default function CurrentReviews() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+
+            LibAuthentication: accessToken || "",
+            LibRefreshAuthentication: refreshToken || "",
           },
           body: JSON.stringify({
             review_id: params.id,
@@ -141,10 +162,23 @@ export default function CurrentReviews() {
         }
       );
 
-      const sendCommentData: { success: boolean; newComment: IReviewComment } =
-        await sendCommentResponse.json();
+      const sendCommentData: {
+        success: boolean;
+        message: string;
+        newComment: IReviewComment;
+      } = await sendCommentResponse.json();
 
       console.log("review data", sendCommentData);
+      if (!sendCommentData.success && sendCommentData.message) {
+        toast(sendCommentData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
+      }
 
       if (sendCommentData.success) {
         setReviewComments((prev) => {
@@ -156,7 +190,7 @@ export default function CurrentReviews() {
 
       setIsLoading(false);
     },
-    [currentUserId, params.id]
+    [currentUserId, params.id, accessToken, refreshToken]
   );
 
   const handleAddComment = useCallback(() => {
@@ -170,6 +204,8 @@ export default function CurrentReviews() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           review_id: params.id,
@@ -177,10 +213,20 @@ export default function CurrentReviews() {
         }),
       });
 
-      const changeReviewData: { success: boolean } =
+      const changeReviewData: { success: boolean; message: string } =
         await changeReviewResponse.json();
 
       console.log("review data", changeReviewData);
+      if (!changeReviewData.success && changeReviewData.message) {
+        toast(changeReviewData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
+      }
 
       if (changeReviewData.success && review !== null) {
         setNewReview(text);
@@ -201,7 +247,7 @@ export default function CurrentReviews() {
         });
       }
     },
-    [params.id, review]
+    [params.id, review, accessToken, refreshToken]
   );
 
   const doCommentAction = useCallback(
@@ -216,6 +262,8 @@ export default function CurrentReviews() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            LibAuthentication: accessToken || "",
+            LibRefreshAuthentication: refreshToken || "",
           },
           body: JSON.stringify({
             review_comment_id: commentId,
@@ -230,6 +278,17 @@ export default function CurrentReviews() {
 
       console.log("review data", sendCommentData);
 
+      if (!sendCommentData.success && sendCommentData.message) {
+        toast(sendCommentData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+  
+        return;
+      }
+  
       if (sendCommentData.success) {
         toast(sendCommentData.message, {
           autoClose: 3000,
@@ -253,7 +312,7 @@ export default function CurrentReviews() {
 
       setIsLoading(false);
     },
-    [currentUserId]
+    [currentUserId, accessToken, refreshToken]
   );
 
   return (

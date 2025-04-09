@@ -60,7 +60,7 @@ export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
   const [modalIsOpen, setIsModalOpen] = useState<boolean>(false);
   const [ellipsis, setEllipsis] = useState(true);
 
-  const { updateUserId } = useContext(UserContext)!;
+  const { updateUserId, setAccess, setRefresh } = useContext(UserContext)!;
   const { currentTheme, toggleTheme } = useContext(ThemeContext);
 
   function openModal() {
@@ -128,7 +128,6 @@ export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
             </Space>
 
             <Switch
-             
               checked={currentTheme === "dark"}
               onChange={toggleTheme}
             ></Switch>
@@ -163,11 +162,15 @@ export const Menu: FC<MenuProps> = ({ backgroundColor }) => {
             onClick={() => {
               if (typeof window !== "undefined") {
                 window.localStorage.removeItem("user_id");
+                window.localStorage.removeItem("data.lib_access_token");
+                window.localStorage.removeItem("lib_refresh_token");
               }
 
               closeModal();
 
               updateUserId(null);
+              setAccess(null);
+              setRefresh(null);
 
               router.replace("/login");
             }}

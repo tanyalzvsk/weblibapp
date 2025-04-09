@@ -7,77 +7,113 @@ import style from "./page.module.css";
 import background from "../../../public/page-background-main.png";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
-import { API_URL, API_USER_ID } from "@/constants";
+import { API_URL } from "@/constants";
 import { IUser } from "@/types";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { FriendCard } from "@/components/FriendCard";
 import { UserContext, useAuthCheck } from "@/utils";
 import { useRouter } from "next/navigation";
+import { toast, Bounce } from "react-toastify";
 
 export default function Friends() {
   const [friends, setFriends] = useState<IUser[]>([]);
   const [nonFriends, setNonFriends] = useState<IUser[]>([]);
   const router = useRouter();
 
-  const { currentUserId } = useContext(UserContext)!;
+  const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
 
   useAuthCheck(router);
 
-  const loadFriends = useCallback(async (id: number) => {
-    const friendsResponse = await fetch(`${API_URL}/friends`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: id,
-      }),
-    });
+  const loadFriends = useCallback(
+    async (id: number) => {
+      const friendsResponse = await fetch(`${API_URL}/friends`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
+        },
+        body: JSON.stringify({
+          user_id: id,
+        }),
+      });
 
-    const friendsData: { success: boolean; friendsList?: IUser[] } =
-      await friendsResponse.json();
+      const friendsData: { success: boolean; message: string; friendsList?: IUser[] } =
+        await friendsResponse.json();
 
-    console.log("Friends", friendsData.friendsList);
+      console.log("Friends", friendsData.friendsList);
 
-    if (friendsData.success && friendsData.friendsList) {
-      const filteredFriends = friendsData.friendsList.filter(
-        (friend) => friend.id !== id
-      );
+      if (!friendsData.success && friendsData.message) {
+        toast(friendsData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
 
-      setFriends(filteredFriends);
-    }
-  }, []);
+        return;
+      }
 
-  const loadNonFriends = useCallback(async (id: number) => {
-    const nonFriendsResponse = await fetch(`${API_URL}/non_friends`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: id,
-      }),
-    });
+      if (friendsData.success && friendsData.friendsList) {
+        const filteredFriends = friendsData.friendsList.filter(
+          (friend) => friend.id !== id
+        );
 
-    const nonFriendsData: { success: boolean; nonFriendsList?: IUser[] } =
-      await nonFriendsResponse.json();
+        setFriends(filteredFriends);
+      }
+    },
+    [accessToken, refreshToken]
+  );
 
-    console.log("non Friends", nonFriendsData.nonFriendsList);
+  const loadNonFriends = useCallback(
+    async (id: number) => {
+      const nonFriendsResponse = await fetch(`${API_URL}/non_friends`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
+        },
+        body: JSON.stringify({
+          user_id: id,
+        }),
+      });
 
-    if (nonFriendsData.success && nonFriendsData.nonFriendsList) {
-      const filteredNonFriends = nonFriendsData.nonFriendsList.filter(
-        (nonFriend) => nonFriend.id !== id
-      );
+      const nonFriendsData: {
+        success: boolean;
+        message: string;
+        nonFriendsList?: IUser[];
+      } = await nonFriendsResponse.json();
 
-      setNonFriends(filteredNonFriends);
-    }
-  }, []);
+      console.log("non Friends", nonFriendsData.nonFriendsList);
+
+      if (!nonFriendsData.success && nonFriendsData.message) {
+        toast(nonFriendsData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
+      }
+
+      if (nonFriendsData.success && nonFriendsData.nonFriendsList) {
+        const filteredNonFriends = nonFriendsData.nonFriendsList.filter(
+          (nonFriend) => nonFriend.id !== id
+        );
+
+        setNonFriends(filteredNonFriends);
+      }
+    },
+    [accessToken, refreshToken]
+  );
 
   useEffect(() => {
-   if(currentUserId) {
-    loadFriends(currentUserId);
-    loadNonFriends(currentUserId);
-   } 
+    if (currentUserId) {
+      loadFriends(currentUserId);
+      loadNonFriends(currentUserId);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserId]);
 

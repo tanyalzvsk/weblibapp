@@ -7,21 +7,26 @@ import style from "./page.module.css";
 import background from "../../../../public/page-background-main.png";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useContext } from "react";
 import { API_URL } from "@/constants";
 import { ICollection } from "@/types";
 import { useParams } from "next/navigation";
+import { UserContext } from "@/utils";
+import { toast, Bounce } from "react-toastify";
 
 export default function CollectionPage() {
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [collection, setCollection] = useState<ICollection | null>(null);
   const params = useParams<{ id: string }>();
+  const { accessToken, refreshToken } = useContext(UserContext)!;
 
   const loadCollection = useCallback(async () => {
     const collectionResponse = await fetch(`${API_URL}/collection/search`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        LibAuthentication: accessToken || "",
+        LibRefreshAuthentication: refreshToken || "",
       },
       body: JSON.stringify(`${params.id}`),
     });
@@ -30,8 +35,18 @@ export default function CollectionPage() {
 
     console.log("collection", collectionData);
 
+    if (!collectionData.success && collectionData.message) {
+      toast(collectionData.message, {
+        autoClose: 2000,
+        transition: Bounce,
+        closeOnClick: true,
+        type: "error",
+      });
+
+      return;
+    }
     setCollection(collectionData);
-  }, [params.id]);
+  }, [params.id, accessToken, refreshToken]);
 
   useEffect(() => {
     loadCollection();

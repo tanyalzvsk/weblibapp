@@ -1,4 +1,6 @@
 export interface IBook {
+  success: any;
+  message?: string;
   book_id: number;
   author: string;
   name: string;

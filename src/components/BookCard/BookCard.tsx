@@ -4,7 +4,6 @@ import {
   FC,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -19,7 +18,7 @@ import {
   generateRandomColorDark,
   ThemeContext,
 } from "@/utils";
-import { API_URL, API_USER_ID, BASE_API_URL } from "@/constants";
+import { API_URL, BASE_API_URL } from "@/constants";
 import { useAuthCheck } from "@/utils";
 
 export type BookStatus = "read" | "reading" | "complete";
@@ -72,7 +71,7 @@ export const BookCard: FC<BookCardProps> = ({
     router.replace(`/book/${book_id}`);
   }, [router, book_id]);
 
-  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+  const { currentTheme } = useContext(ThemeContext);
 
   const bgColor: string = useMemo(() => {
     return currentTheme === "light"

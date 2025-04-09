@@ -7,40 +7,53 @@ import style from "./page.module.css";
 import background from "../../../public/page-background-main.png";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
-import { API_URL, API_USER_ID } from "@/constants";
+import { API_URL } from "@/constants";
 import { ICollection } from "@/types";
 import { useState, useCallback, useEffect, useContext } from "react";
 import { UserContext, useAuthCheck } from "@/utils";
 import { useRouter } from "next/navigation";
+import { toast, Bounce } from "react-toastify";
 
 export default function Collections() {
   const [collections, setCollections] = useState<ICollection[]>([]);
 
-  const { currentUserId } = useContext(UserContext)!;
+  const { currentUserId, accessToken, refreshToken} = useContext(UserContext)!;
 
   const router = useRouter();
 
   useAuthCheck(router);
 
   const loadCollectionsData = useCallback(async (id: number) => {
-    //change USER id to user RN
+
     const collectionsResponse = await fetch(`${API_URL}/all_user_collections`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        LibAuthentication:  accessToken || '',
+        LibRefreshAuthentication: refreshToken || '',
       },
       body: JSON.stringify({
         user_id: id,
       }),
     });
 
-    const collectionsData: { collections: ICollection[] } =
+    const collectionsData: { success: boolean; message: string; collections: ICollection[] } =
       await collectionsResponse.json();
 
     console.log("collections", collectionsData.collections);
+    if (!collectionsData.success && collectionsData.message) {
+      toast(collectionsData.message, {
+        autoClose: 2000,
+        transition: Bounce,
+        closeOnClick: true,
+        type: "error",
+      });
+
+      return;
+    }
 
     setCollections(collectionsData.collections);
-  }, []);
+  }, [accessToken, refreshToken]);
 
   useEffect(() => {
     if (currentUserId) {

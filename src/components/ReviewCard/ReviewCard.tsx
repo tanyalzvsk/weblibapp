@@ -25,7 +25,7 @@ export const ReviewCard: FC<ReviewCardProps> = ({
   book_name = "",
   backgroundColor = "",
 }) => {
-  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+  const { currentTheme } = useContext(ThemeContext);
 
   const bgColor: string = useMemo(() => {
     return currentTheme === "light"

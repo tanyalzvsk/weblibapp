@@ -16,7 +16,7 @@ import background from "../../../../public/page-background-main.png";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { API_URL, API_USER_ID, enabledFilters, filtersType } from "@/constants";
+import { API_URL, filtersType } from "@/constants";
 import { IUser, IBook, ICollection, IReview } from "@/types";
 import { useParams, useRouter } from "next/navigation";
 import { ProfileSection } from "@/components/ProfileSection";
@@ -24,9 +24,8 @@ import { FriendCard } from "@/components/FriendCard";
 import { UserContext, useAuthCheck } from "@/utils";
 import { getMonthName } from "@/utils";
 
-import { Avatar, Typography, Tabs, Flex } from "antd";
-const { Title, Text } = Typography;
-const { TabPane } = Tabs;
+import { Tabs, Flex } from "antd";
+import { toast, Bounce } from "react-toastify";
 
 export default function CollectionPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -40,7 +39,7 @@ export default function CollectionPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
 
-  const { currentUserId } = useContext(UserContext)!;
+  const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
 
   useAuthCheck(router);
 
@@ -49,16 +48,28 @@ export default function CollectionPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        LibAuthentication: accessToken || "",
+        LibRefreshAuthentication: refreshToken || "",
       },
       body: JSON.stringify(`${params.id}`),
     });
 
-    const userData: IUser = await userResponse.json();
+    const userData: { success: boolean; message: string; user: IUser } =
+      await userResponse.json();
 
     console.log("user", userData);
+    if (!userData.success && userData.message) {
+      toast(userData.message, {
+        autoClose: 2000,
+        transition: Bounce,
+        closeOnClick: true,
+        type: "error",
+      });
 
-    setUserFriend(userData);
-  }, [params.id]);
+      return;
+    }
+    setUserFriend(userData.user);
+  }, [params.id, accessToken, refreshToken]);
 
   const loadIsFriendData = useCallback(
     async (id: number) => {
@@ -66,6 +77,8 @@ export default function CollectionPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           user_id: id,
@@ -73,16 +86,29 @@ export default function CollectionPage() {
         }),
       });
 
-      const isFriendData: { success: boolean; is_friend: boolean } =
-        await isFriendResponse.json();
+      const isFriendData: {
+        success: boolean;
+        message: string;
+        is_friend: boolean;
+      } = await isFriendResponse.json();
 
+      if (!isFriendData.success && isFriendData.message) {
+        toast(isFriendData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
+      }
       console.log("is friend", isFriendData.success);
 
       if (isFriendData.success) {
         setIsFriend(isFriendData.is_friend);
       }
     },
-    [params.id]
+    [params.id, accessToken, refreshToken]
   );
 
   // const loadBooks = useCallback(async () => {
@@ -107,6 +133,8 @@ export default function CollectionPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           user_id: currentUserId,
@@ -114,15 +142,25 @@ export default function CollectionPage() {
         }),
       });
 
-      const friendsData: { success: boolean } = await addFriendRes.json();
+      const friendsData: { success: boolean; message: string } =
+        await addFriendRes.json();
 
-      if (friendsData.success) {
-        setIsFriend(true);
+      if (!friendsData.success && friendsData.message) {
+        toast(friendsData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
       }
+
+      setIsFriend(true);
 
       console.log("Add Friend? ", friendsData.success);
     },
-    [currentUserId]
+    [currentUserId, accessToken, refreshToken]
   );
 
   const removeFriendReq = useCallback(
@@ -131,6 +169,8 @@ export default function CollectionPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           user_id: currentUserId,
@@ -138,15 +178,25 @@ export default function CollectionPage() {
         }),
       });
 
-      const friendsData: { success: boolean } = await removeFriendRes.json();
+      const friendsData: { success: boolean; message: string } =
+        await removeFriendRes.json();
 
-      if (friendsData.success) {
-        setIsFriend(false);
+      if (!friendsData.success && friendsData.message) {
+        toast(friendsData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
       }
+
+      setIsFriend(false);
 
       console.log("remove Friend? ", friendsData.success);
     },
-    [currentUserId]
+    [currentUserId, accessToken, refreshToken]
   );
 
   const addFriend = useCallback(
@@ -185,6 +235,8 @@ export default function CollectionPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           user_id: params.id,
@@ -198,7 +250,7 @@ export default function CollectionPage() {
 
       setBooks(booksData);
     },
-    [params.id]
+    [params.id, accessToken, refreshToken]
   );
 
   const loadReadBooks = useCallback(async () => {
@@ -245,21 +297,34 @@ export default function CollectionPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        LibAuthentication: accessToken || "",
+        LibRefreshAuthentication: refreshToken || "",
       },
       body: JSON.stringify({
         user_id: params.id,
       }),
     });
 
-    const reviewData: { success: boolean; reviews: IReview[] } =
-      await userReviewsResponse.json();
+    const reviewData: {
+      success: boolean;
+      message: string;
+      reviews: IReview[];
+    } = await userReviewsResponse.json();
 
     console.log("review data", reviewData);
 
-    if (reviewData.success) {
-      setReviews(reviewData.reviews);
+    if (!reviewData.success && reviewData.message) {
+      toast(reviewData.message, {
+        autoClose: 2000,
+        transition: Bounce,
+        closeOnClick: true,
+        type: "error",
+      });
+
+      return;
     }
-  }, [params.id]);
+    setReviews(reviewData.reviews);
+  }, [params.id, accessToken, refreshToken]);
 
   const loadReviews = useCallback(async () => {
     if (isLoading) return;
@@ -279,21 +344,33 @@ export default function CollectionPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        LibAuthentication: accessToken || "",
+        LibRefreshAuthentication: refreshToken || "",
       },
       body: JSON.stringify({
         user_id: params.id,
       }),
     });
 
-    const friendsData: { success: boolean; friendsList?: IUser[] } =
+    const friendsData: { success: boolean; message: string; friendsList?: IUser[] } =
       await friendsResponse.json();
 
     console.log("Friends", friendsData.friendsList);
 
+    if (!friendsData.success && friendsData.message) {
+      toast(friendsData.message, {
+        autoClose: 2000,
+        transition: Bounce,
+        closeOnClick: true,
+        type: "error",
+      });
+
+      return;
+    }
     if (friendsData.success && friendsData.friendsList) {
       setFriends(friendsData.friendsList);
     }
-  }, [params.id]);
+  }, [params.id, accessToken, refreshToken]);
 
   const loadFriends = useCallback(async () => {
     if (isLoading) return;
@@ -314,13 +391,15 @@ export default function CollectionPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        LibAuthentication: accessToken || "",
+        LibRefreshAuthentication: refreshToken || "",
       },
       body: JSON.stringify({
         user_id: params.id,
       }),
     });
 
-    const collectionsData: { collections: ICollection[] } =
+    const collectionsData: { success: boolean; message: string; collections: ICollection[] } =
       await collectionsResponse.json();
 
     const userColls = collectionsData.collections.filter(
@@ -329,10 +408,20 @@ export default function CollectionPage() {
 
     console.log("collections", userColls);
 
-    setCollections(userColls);
-  }, [params.id, user?.name]);
+    if (!collectionsData.success && collectionsData.message) {
+      toast(collectionsData.message, {
+        autoClose: 2000,
+        transition: Bounce,
+        closeOnClick: true,
+        type: "error",
+      });
 
-  const loadCollectios = useCallback(async () => {
+      return;
+    }
+    setCollections(userColls);
+  }, [params.id, user?.name, accessToken, refreshToken]);
+
+  const loadCollections = useCallback(async () => {
     if (isLoading) return;
 
     setIsLoading(true);
@@ -368,7 +457,7 @@ export default function CollectionPage() {
       }
 
       if (filter === "collections") {
-        loadCollectios();
+        loadCollections();
         return;
       }
 
@@ -382,7 +471,7 @@ export default function CollectionPage() {
       loadReadBooks,
       loadReadingBooks,
       loadReviews,
-      loadCollectios,
+      loadCollections,
       loadFriends,
     ]
   );
@@ -405,7 +494,8 @@ export default function CollectionPage() {
       <Flex className={style.pageContent}>
         <ProfileSection
           id={user ? user.id : 1}
-          name={user ? user.name : "loading data"}
+          name={user ? user.name : "loading data..."}
+          info={user ? user.info : ""}
           avatarUrl={user ? user.avatarUrl : ""}
           isFriend={isFriend}
           onAddFriend={() => {
@@ -420,94 +510,6 @@ export default function CollectionPage() {
           }}
         />
 
-        {/* <div className={style.tabsWrapper}>
-          {enabledFilters.map((item) => (
-            <div
-              key={item}
-              className={classNames(style.tab, {
-                [style.selected]: filter === item,
-              })}
-              onClick={() => {
-                if (filter !== item) {
-                  setFilter(item);
-                  loadCurrentBooks(item);
-                }
-              }}
-            >
-              <p className={classNames(style.tabTitle, Poppins.className)}>
-                {item}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className={style.mainContent}>
-          {filter === "read" &&
-            books.map((item) => <BookCard key={item.book_id} {...item} />)}
-
-          {filter === "reading" &&
-            books.map((item) => <BookCard key={item.book_id} {...item} />)}
-
-          {filter === "completed" &&
-            books
-              .sort((a, b) => {
-                if (a.date && b.date) {
-                  const dateA = new Date(a.date);
-                  const dateB = new Date(b.date);
-
-                  return dateA.getTime() - dateB.getTime();
-                }
-
-                return 0;
-              })
-              .map((book) => {
-                if (!book.date) {
-                  return;
-                }
-                const month = +book.date.substr(5, 2); // Извлечение месяца из поля date (предполагается формат 'year-month-day')
-
-                // Если текущий месяц отличается от полученного месяца, выводим название месяца
-                if (currentMonth !== month) {
-                  currentMonth = month;
-                  return (
-                    <div key={month}>
-                      <h1 style={{ fontSize: "30px" }}>
-                        {getMonthName(month)}
-                      </h1>
-                      <BookCard key={book.book_id} {...book} />
-                    </div>
-                  );
-                }
-
-                return <BookCard key={book.book_id} {...book} />;
-              })}
-
-          {filter === "reviews" &&
-            reviews.map((review) => (
-              <ReviewCard key={review.review_id} {...review} />
-            ))}
-
-          {filter === "collections" &&
-            collections.map((collection) => (
-              <CollectionCard key={collection.id} {...collection} />
-            ))}
-
-          {filter === "friends" &&
-            friends.map((friend) => (
-              <FriendCard
-                isFriend
-                isMe={friend.id == currentUserId}
-                key={friend.id + friend.name}
-                isImmutable
-                onSuccess={(id) =>
-                  setFriends((friends) =>
-                    friends.filter((friend) => friend.id !== id)
-                  )
-                }
-                {...friend}
-              />
-            ))}
-        </div> */}
         <Tabs
           defaultActiveKey="read"
           activeKey={filter}

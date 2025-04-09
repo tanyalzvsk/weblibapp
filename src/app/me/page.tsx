@@ -17,16 +17,15 @@ import background from "../../../public/page-background-main.png";
 import { ProfileSection } from "@/components/ProfileSection";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
-import { API_URL, API_USER_ID, enabledFilters, filtersType } from "@/constants";
+import { API_URL, filtersType } from "@/constants";
 import { IBook, ICollection, IReview, IUser } from "@/types";
 import { FriendCard } from "@/components/FriendCard";
-import { UserContext, useAuthCheck, ThemeContext } from "@/utils";
+import { UserContext, useAuthCheck } from "@/utils";
 import { getMonthName } from "@/utils";
 import { useRouter } from "next/navigation";
 
-import { Avatar, Typography, Tabs, Flex } from "antd";
-const { Title, Text } = Typography;
-const { TabPane } = Tabs;
+import { Tabs, Flex, message } from "antd";
+import { Bounce, toast } from "react-toastify";
 
 interface Me {
   id: number;
@@ -42,7 +41,7 @@ export default function Me() {
   const [friends, setFriends] = useState<IUser[]>([]);
   const [collections, setCollections] = useState<ICollection[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
+  const { accessToken, refreshToken } = useContext(UserContext)!;
 
   const [me, setMe] = useState<Me>({
     id: 1,
@@ -55,23 +54,26 @@ export default function Me() {
 
   useAuthCheck(router);
 
-  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+  const loadMe = useCallback(
+    async (id: number) => {
+      const meResponse = await fetch(`${API_URL}/user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
+        },
+        body: JSON.stringify(`${id}`),
+      });
 
-  const loadMe = useCallback(async (id: number) => {
-    const meResponse = await fetch(`${API_URL}/user`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(`${id}`),
-    });
+      const meData: Me = await meResponse.json();
 
-    const meData: Me = await meResponse.json();
+      console.log("me data", meData);
 
-    console.log("me data", meData);
-
-    setMe(meData);
-  }, []);
+      setMe(meData);
+    },
+    [accessToken, refreshToken]
+  );
 
   const changeInfoSuccessHandler = (newInfo: string) => {
     setMe((me) => {
@@ -85,6 +87,8 @@ export default function Me() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           user_id: id,
@@ -92,60 +96,95 @@ export default function Me() {
         }),
       });
 
-      const booksData: IBook[] = await booksResponse.json();
+      const booksData:  IBook[]  = await booksResponse.json();
 
       console.log("data", booksData);
 
       setBooks(booksData);
     },
-    []
+    [accessToken, refreshToken]
   );
 
-  const loadUserReviews = useCallback(async (id: number) => {
-    const userReviewsResponse = await fetch(`${API_URL}/reviews_owner`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: id,
-      }),
-    });
+  const loadUserReviews = useCallback(
+    async (id: number) => {
+      const userReviewsResponse = await fetch(`${API_URL}/reviews_owner`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
+        },
+        body: JSON.stringify({
+          user_id: id,
+        }),
+      });
 
-    const reviewData: { success: boolean; reviews: IReview[] } =
-      await userReviewsResponse.json();
+      const reviewData: {
+        success: boolean;
+        message?: string;
+        reviews: IReview[];
+      } = await userReviewsResponse.json();
 
-    console.log("review data", reviewData);
+      console.log("review data", reviewData);
 
-    if (reviewData.success) {
-      setReviews(reviewData.reviews);
-    }
-  }, []);
+      if (reviewData.success) {
+        setReviews(reviewData.reviews);
+      } else {
+        toast(reviewData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+        return;
+      }
+    },
+    [accessToken, refreshToken]
+  );
 
-  const loadFriendsData = useCallback(async (id: number) => {
-    const friendsResponse = await fetch(`${API_URL}/friends`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: id,
-      }),
-    });
+  const loadFriendsData = useCallback(
+    async (id: number) => {
+      const friendsResponse = await fetch(`${API_URL}/friends`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
+        },
+        body: JSON.stringify({
+          user_id: id,
+        }),
+      });
 
-    const friendsData: { success: boolean; friendsList?: IUser[] } =
-      await friendsResponse.json();
+      const friendsData: {
+        success: boolean;
+        message: string;
+        friendsList?: IUser[];
+      } = await friendsResponse.json();
 
-    console.log("Friends", friendsData.friendsList);
+      if (!friendsData.success && friendsData.message) {
+        toast(friendsData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
 
-    if (friendsData.success && friendsData.friendsList) {
-      const filteredFriends = friendsData.friendsList.filter(
-        (friend) => friend.id !== id
-      );
+        return;
+      }
 
-      setFriends(filteredFriends);
-    }
-  }, []);
+      console.log("Friends", friendsData.friendsList);
+
+      if (friendsData.success && friendsData.friendsList) {
+        const filteredFriends = friendsData.friendsList.filter(
+          (friend) => friend.id !== id
+        );
+
+        setFriends(filteredFriends);
+      }
+    },
+    [accessToken, refreshToken]
+  );
 
   const loadCollectionsData = useCallback(
     async (id: number) => {
@@ -155,6 +194,9 @@ export default function Me() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+
+            LibAuthentication: accessToken || "",
+            LibRefreshAuthentication: refreshToken || "",
           },
           body: JSON.stringify({
             user_id: id,
@@ -162,8 +204,22 @@ export default function Me() {
         }
       );
 
-      const collectionsData: { collections: ICollection[] } =
-        await collectionsResponse.json();
+      const collectionsData: {
+        success: boolean;
+        message: string;
+        collections: ICollection[];
+      } = await collectionsResponse.json();
+
+      if (!collectionsData.success && collectionsData.message) {
+        toast(collectionsData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
+      }
 
       const userColls = collectionsData.collections.filter(
         (collection) => collection.author === me.name
@@ -173,7 +229,7 @@ export default function Me() {
 
       setCollections(userColls);
     },
-    [me.name]
+    [me.name, accessToken, refreshToken]
   );
 
   const loadReadBooks = useCallback(
@@ -360,7 +416,7 @@ export default function Me() {
                     fontSize: "18px",
                   }}
                 >
-                  reviews
+                  read
                 </span>
               ),
 
