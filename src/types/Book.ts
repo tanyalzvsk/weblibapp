@@ -1,5 +1,5 @@
 export interface IBook {
-  success: any;
+  success?: boolean;
   message?: string;
   book_id: number;
   author: string;

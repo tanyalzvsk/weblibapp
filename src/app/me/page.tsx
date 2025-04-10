@@ -24,8 +24,9 @@ import { UserContext, useAuthCheck } from "@/utils";
 import { getMonthName } from "@/utils";
 import { useRouter } from "next/navigation";
 
-import { Tabs, Flex, message } from "antd";
+import { Tabs, Flex } from "antd";
 import { Bounce, toast } from "react-toastify";
+import { useTokenRefresh } from "@/utils/useRefreshToken";
 
 interface Me {
   id: number;
@@ -42,6 +43,7 @@ export default function Me() {
   const [collections, setCollections] = useState<ICollection[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { accessToken, refreshToken } = useContext(UserContext)!;
+  const refreshTokenHandler = useTokenRefresh();
 
   const [me, setMe] = useState<Me>({
     id: 1,
@@ -66,10 +68,29 @@ export default function Me() {
         body: JSON.stringify(`${id}`),
       });
 
-      const meData: Me = await meResponse.json();
+      const meData: Me | { message: string; success: boolean } =
+        await meResponse.json();
 
       console.log("me data", meData);
 
+      if ('message' in meData) {
+        if (meData.message === "TOKEN_EXPIRED") {
+          toast("expired session. refreshing tokens", {
+            autoClose: 2000,
+            type: "info",
+          });
+
+          return "REPEAT";
+        }
+
+        toast(meData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+        return;
+      }
       setMe(meData);
     },
     [accessToken, refreshToken]
@@ -96,8 +117,27 @@ export default function Me() {
         }),
       });
 
-      const booksData:  IBook[]  = await booksResponse.json();
+      const booksData: IBook[] | { message: string; success: boolean } =
+        await booksResponse.json();
 
+      if ('message' in booksData) {
+        if (booksData.message === "TOKEN_EXPIRED") {
+          toast("expired session. refreshing tokens", {
+            autoClose: 2000,
+            type: "info",
+          });
+
+          return "REPEAT";
+        }
+
+        toast(booksData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+        return;
+      }
       console.log("data", booksData);
 
       setBooks(booksData);
@@ -127,9 +167,16 @@ export default function Me() {
 
       console.log("review data", reviewData);
 
-      if (reviewData.success) {
-        setReviews(reviewData.reviews);
-      } else {
+      if (!reviewData.success) {
+        if (reviewData.message === "TOKEN_EXPIRED") {
+          toast("expired session. refreshing tokens", {
+            autoClose: 2000,
+            type: "info",
+          });
+
+          return "REPEAT";
+        }
+
         toast(reviewData.message, {
           autoClose: 2000,
           transition: Bounce,
@@ -138,6 +185,7 @@ export default function Me() {
         });
         return;
       }
+      setReviews(reviewData.reviews);
     },
     [accessToken, refreshToken]
   );
@@ -162,14 +210,22 @@ export default function Me() {
         friendsList?: IUser[];
       } = await friendsResponse.json();
 
-      if (!friendsData.success && friendsData.message) {
+      if (!friendsData.success) {
+        if (friendsData.message === "TOKEN_EXPIRED") {
+          toast("expired session. refreshing tokens", {
+            autoClose: 2000,
+            type: "info",
+          });
+
+          return "REPEAT";
+        }
+
         toast(friendsData.message, {
           autoClose: 2000,
           transition: Bounce,
           closeOnClick: true,
           type: "error",
         });
-
         return;
       }
 
@@ -185,6 +241,22 @@ export default function Me() {
     },
     [accessToken, refreshToken]
   );
+  const loadMeWithRefresh = useCallback(async () => {
+    if (currentUserId) {
+      const state = await loadMe(currentUserId);
+
+      if (state === "REPEAT") {
+        refreshTokenHandler(currentUserId, async () => {
+          await loadMe(currentUserId);
+        });
+      }
+    }
+  }, [currentUserId, loadMe, refreshTokenHandler]);
+
+  useEffect(() => {
+    loadMeWithRefresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, currentUserId]);
 
   const loadCollectionsData = useCallback(
     async (id: number) => {
@@ -210,14 +282,22 @@ export default function Me() {
         collections: ICollection[];
       } = await collectionsResponse.json();
 
-      if (!collectionsData.success && collectionsData.message) {
+      if (!collectionsData.success) {
+        if (collectionsData.message === "TOKEN_EXPIRED") {
+          toast("expired session. refreshing tokens", {
+            autoClose: 2000,
+            type: "info",
+          });
+
+          return "REPEAT";
+        }
+
         toast(collectionsData.message, {
           autoClose: 2000,
           transition: Bounce,
           closeOnClick: true,
           type: "error",
         });
-
         return;
       }
 

@@ -1,7 +1,7 @@
 import { IBook } from ".";
 
 export interface ICollection {
-  success: any;
+  success?: boolean;
   message?: string;
   id: number;
   title: string;
