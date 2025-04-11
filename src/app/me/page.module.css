@@ -56,6 +56,7 @@ flex-wrap: wrap;
   font-weight: 700;
   
 }
+
 .monthAndBooksContainer {
   display: flex;
   align-items: flex-start;

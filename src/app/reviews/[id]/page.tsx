@@ -72,7 +72,7 @@ export default function CurrentReviews() {
     if (reviewData.success) {
       setReview(reviewData.review);
     }
-  }, [params.id]);
+  }, [params.id, accessToken, refreshToken]);
 
   const loadReviewComments = useCallback(async () => {
     if (!currentUserId) {
