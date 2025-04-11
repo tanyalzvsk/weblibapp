@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState, useMemo } from "react";
+import { useCallback, useContext, useState, useMemo, useEffect } from "react";
 import style from "./ReviewForm.module.css";
 import { BookRate } from "../BookRate";
 import classNames from "classnames";
@@ -17,6 +17,8 @@ export type Rating = 1 | 2 | 3 | 4 | 5;
 
 type ReviewFormProps = {
   onSuccess?: () => void;
+  bookId: number;
+  userId: null | number;
 };
 
 type ReviewFormValues = {
@@ -44,8 +46,8 @@ const customRes: Resolver<ReviewFormValues> = async (values) => {
   return result;
 };
 
-const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
-  const { currentTheme, toggleTheme } = useContext(ThemeContext);
+const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess, bookId, userId }) => {
+  const { currentTheme } = useContext(ThemeContext);
   const { handleSubmit, register, formState } = useForm<ReviewFormValues>({
     resolver: customRes,
   });
@@ -54,7 +56,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
   const [rate, setRate] = useState<Rating | number>(1);
   const [text, setText] = useState("");
 
-  const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
+  const { accessToken, refreshToken } = useContext(UserContext)!;
 
   const handleFormSubmit: SubmitHandler<ReviewFormValues> = useCallback(
     async ({ review, reviewTitle }) => {
@@ -78,18 +80,17 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
           LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
-          book_id: 2,
+          book_id: bookId,
           review,
           rate,
           // reviewTitle,
-          user_id: currentUserId,
+          user_id: userId,
         }),
       });
 
       const data: {
         success: boolean;
-        message: string;
-        userId: number | undefined;
+        message?: string;
       } = await response.json();
 
       console.log("me data", data);
@@ -101,7 +102,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
           closeOnClick: true,
           type: "success",
         });
-        
+
         if (!data.success && data.message) {
           toast(data.message, {
             autoClose: 2000,
@@ -112,6 +113,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
 
           return;
         }
+
         if (onSuccess) {
           onSuccess();
         }
@@ -119,13 +121,15 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
     },
     [
       formState.isValid,
-      onSuccess,
-      rate,
-      currentUserId,
       accessToken,
       refreshToken,
+      bookId,
+      rate,
+      userId,
+      onSuccess,
     ]
   );
+
   const reviewThemeClassName = useMemo(() => {
     return "review-" + currentTheme;
   }, [currentTheme]);

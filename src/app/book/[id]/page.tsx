@@ -9,11 +9,11 @@ import { Poppins } from "@/fonts";
 import { useCallback, useEffect, useState, useContext } from "react";
 import { API_URL } from "@/constants";
 import { IBook, ICollection, IReview } from "@/types";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { WriteReviewButton } from "@/components/WriteReviewButton";
 import ReviewForm from "@/components/ReviewForm/ReviewForm";
 import { Typography, Card, Flex, Tabs } from "antd";
-import { UserContext } from "@/utils";
+import { useAuthCheck, UserContext } from "@/utils";
 import { Bounce, toast } from "react-toastify";
 
 const { Title, Text } = Typography;
@@ -26,7 +26,10 @@ export default function BookPage() {
   const params = useParams<{ id: string }>();
   const [isReviewFormVisible, setIsReviewFormVisible] =
     useState<boolean>(false);
-  const { accessToken, refreshToken } = useContext(UserContext)!;
+  const { accessToken, refreshToken, currentUserId } = useContext(UserContext)!;
+  const router = useRouter();
+  
+  useAuthCheck(router);
 
   const loadReviews = useCallback(async () => {
     const reviewResponse = await fetch(`${API_URL}/reviews`, {
@@ -41,19 +44,13 @@ export default function BookPage() {
       }),
     });
 
-    const reviewData: { success: boolean; message?: string; reviews?: IReview[] } =
-      await reviewResponse.json();
+    const reviewData: {
+      success: boolean;
+      reviews: IReview[];
+    } = await reviewResponse.json();
 
-    if (!reviewData.success && reviewData.reviews) {
+    if (reviewData.success) {
       setReviews(reviewData.reviews);
-    } else {
-      toast(reviewData.message, {
-        autoClose: 2000,
-        transition: Bounce,
-        closeOnClick: true,
-        type: "error",
-      });
-      return;
     }
   }, [params.id, accessToken, refreshToken]);
 
@@ -98,7 +95,14 @@ export default function BookPage() {
         className={style.modal}
         overlayClassName={style.overlay}
       >
-        <ReviewForm onSuccess={() => setIsReviewFormVisible(false)} />
+        <ReviewForm
+          userId={currentUserId}
+          bookId={+params.id}
+          onSuccess={() => {
+            setIsReviewFormVisible(false);
+            loadReviews();
+          }}
+        />
       </Modal>
 
       <Menu />
@@ -134,7 +138,10 @@ export default function BookPage() {
               ),
 
               children: (
-                <Flex gap={20}>
+                <Flex
+                  gap={20}
+                  style={{ flexWrap: "wrap", justifyContent: "space-between" }}
+                >
                   <WriteReviewButton
                     handleClick={() =>
                       setIsReviewFormVisible((state) => !state)

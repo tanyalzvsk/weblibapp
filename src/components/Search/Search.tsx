@@ -81,7 +81,7 @@ export const Search: FC<SearchProps> = ({ handleDateChange }) => {
           }
         }}
       >
-        <Image className={style.searchIcon} src={searchIcon} alt="search" />
+        <Image className={style.searchIcon} src={searchIcon} alt="search" />asd
       </button>
 
       <input

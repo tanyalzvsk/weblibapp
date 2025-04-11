@@ -18,6 +18,9 @@ type SignupValues = {
   login: string;
   password: string;
   passwordCopy: string;
+  // email: string;
+  // name: string;
+  // info: string;
 };
 
 const resolver: Resolver<SignupValues> = async (values) => {
@@ -73,8 +76,11 @@ export default function Login() {
           login,
           password,
           email: "willbeaddedsoon@mail.ru",
+          // name: 'TEST',
           info: "will be added soon",
+          // email,
           name: login,
+          // info,
         }),
       });
 

@@ -27,7 +27,10 @@ export default function RootLayout({
       <body>
         <NextTopLoader />
         <ThemeProvider>
-          <ConfigProvider>
+          <ConfigProvider
+          
+            // button={{ className: 'my-button' }}
+          >
             <AntdRegistry>
               <UserProvider>
                 <div>{children}</div>

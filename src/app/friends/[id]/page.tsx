@@ -547,7 +547,7 @@ export default function CollectionPage() {
                     fontSize: "18px",
                   }}
                 >
-                  read
+                  reviews
                 </span>
               ),
 
