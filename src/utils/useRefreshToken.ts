@@ -43,8 +43,8 @@ export const useTokenRefresh = () => {
 
       if (typeof window !== "undefined") {
         window.localStorage.removeItem("user_id");
-        window.localStorage.removeItem("data.lib_access_token");
-        window.localStorage.removeItem("lib_refresh_token");
+        window.localStorage.removeItem("access_token");
+        window.localStorage.removeItem("refresh_token");
       }
 
       setAccess(null);

@@ -6,6 +6,8 @@ interface USI extends IUser {
 }
 
 export interface ISearchData {
+  success?: boolean;
+  message?: string;
   users: USI[];
   books: IBook[];
   book_by_author: IBook[];

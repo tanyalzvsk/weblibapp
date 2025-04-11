@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  FC,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { FC, useCallback, useContext, useMemo, useState } from "react";
 import style from "./BookCard.module.css";
 import { IBook } from "@/types";
 import { Poppins } from "@/fonts";
@@ -25,6 +19,7 @@ export type BookStatus = "read" | "reading" | "complete";
 export type BookStatusDB = "Прочитано" | "Буду читать" | "Читаю сейчас";
 
 import { Image } from "antd";
+import { toast, Bounce } from "react-toastify";
 
 export interface BookCardProps extends IBook {
   backgroundColor?: string;
@@ -79,7 +74,7 @@ export const BookCard: FC<BookCardProps> = ({
       : generateRandomColorDark();
   }, [currentTheme]);
 
-  const { currentUserId } = useContext(UserContext)!;
+  const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
 
   useAuthCheck(router);
 
@@ -89,6 +84,8 @@ export const BookCard: FC<BookCardProps> = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           user_id: id,
@@ -97,16 +94,25 @@ export const BookCard: FC<BookCardProps> = ({
         }),
       });
 
-      const bookStatusData: { success: boolean } =
+      const bookStatusData: { success: boolean; message: string } =
         await bookStatusResponse.json();
 
       console.log("new status", status);
 
-      if (bookStatusData.success) {
-        setCurrentStatus(status);
+      if (!bookStatusData.success && bookStatusData.message) {
+        toast(bookStatusData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
       }
+
+      setCurrentStatus(status);
     },
-    []
+    [accessToken, refreshToken]
   );
 
   const handleBookComplete = useCallback(async () => {

@@ -58,6 +58,8 @@ export default function Me() {
 
   const loadMe = useCallback(
     async (id: number) => {
+      console.log("ud of user: ", id);
+
       const meResponse = await fetch(`${API_URL}/user`, {
         method: "POST",
         headers: {
@@ -73,7 +75,7 @@ export default function Me() {
 
       console.log("me data", meData);
 
-      if ('message' in meData) {
+      if ("message" in meData) {
         if (meData.message === "TOKEN_EXPIRED") {
           toast("expired session. refreshing tokens", {
             autoClose: 2000,
@@ -120,7 +122,7 @@ export default function Me() {
       const booksData: IBook[] | { message: string; success: boolean } =
         await booksResponse.json();
 
-      if ('message' in booksData) {
+      if ("message" in booksData) {
         if (booksData.message === "TOKEN_EXPIRED") {
           toast("expired session. refreshing tokens", {
             autoClose: 2000,
@@ -136,6 +138,7 @@ export default function Me() {
           closeOnClick: true,
           type: "error",
         });
+
         return;
       }
       console.log("data", booksData);
@@ -266,7 +269,6 @@ export default function Me() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-
             LibAuthentication: accessToken || "",
             LibRefreshAuthentication: refreshToken || "",
           },
@@ -502,9 +504,10 @@ export default function Me() {
 
               children: (
                 <Flex gap={20} wrap>
-                  {books.map((item) => (
-                    <BookCard key={item.book_id} {...item} />
-                  ))}
+                  {books &&
+                    books.map((item) => (
+                      <BookCard key={item.book_id} {...item} />
+                    ))}
                 </Flex>
               ),
             },
@@ -523,9 +526,10 @@ export default function Me() {
               ),
               children: (
                 <Flex gap={20}>
-                  {books.map((item) => (
-                    <BookCard key={item.book_id} {...item} />
-                  ))}
+                  {books &&
+                    books.map((item) => (
+                      <BookCard key={item.book_id} {...item} />
+                    ))}
                 </Flex>
               ),
             },
@@ -547,47 +551,48 @@ export default function Me() {
 
               children: (
                 <Flex gap={20}>
-                  {books
-                    .sort((a, b) => {
-                      if (a.date && b.date) {
-                        const dateA = new Date(a.date);
-                        const dateB = new Date(b.date);
+                  {books &&
+                    books
+                      .sort((a, b) => {
+                        if (a.date && b.date) {
+                          const dateA = new Date(a.date);
+                          const dateB = new Date(b.date);
 
-                        return dateA.getTime() - dateB.getTime();
-                      }
+                          return dateA.getTime() - dateB.getTime();
+                        }
 
-                      return 0;
-                    })
-                    .map((book) => {
-                      if (!book.date) {
-                        return;
-                      }
-                      const month = +book.date.substr(5, 2);
-                      if (currentMonth !== month) {
-                        currentMonth = month;
-                        return (
-                          <div
-                            key={month}
-                            className={style.monthAndBooksContainer}
-                          >
-                            <h1
-                              className={classNames(
-                                style.monthTitle,
-
-                                Poppins.className
-                              )}
+                        return 0;
+                      })
+                      .map((book) => {
+                        if (!book.date) {
+                          return;
+                        }
+                        const month = +book.date.substr(5, 2);
+                        if (currentMonth !== month) {
+                          currentMonth = month;
+                          return (
+                            <div
+                              key={month}
+                              className={style.monthAndBooksContainer}
                             >
-                              {" "}
-                              {getMonthName(month)}
-                            </h1>
-                            <div className={style.booksContainer}>
-                              <BookCard key={book.book_id} {...book} />{" "}
+                              <h1
+                                className={classNames(
+                                  style.monthTitle,
+
+                                  Poppins.className
+                                )}
+                              >
+                                {" "}
+                                {getMonthName(month)}
+                              </h1>
+                              <div className={style.booksContainer}>
+                                <BookCard key={book.book_id} {...book} />{" "}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      }
-                      return <BookCard key={book.book_id} {...book} />;
-                    })}
+                          );
+                        }
+                        return <BookCard key={book.book_id} {...book} />;
+                      })}
                 </Flex>
               ),
             },

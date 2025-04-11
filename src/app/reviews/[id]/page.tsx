@@ -56,7 +56,6 @@ export default function CurrentReviews() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-
         LibAuthentication: accessToken || "",
         LibRefreshAuthentication: refreshToken || "",
       },
@@ -84,7 +83,6 @@ export default function CurrentReviews() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-
         LibAuthentication: accessToken || "",
         LibRefreshAuthentication: refreshToken || "",
       },
@@ -150,7 +148,6 @@ export default function CurrentReviews() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-
             LibAuthentication: accessToken || "",
             LibRefreshAuthentication: refreshToken || "",
           },

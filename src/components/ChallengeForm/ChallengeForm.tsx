@@ -39,7 +39,7 @@ export const ChallengeForm: React.FC<ChallengeFormProps> = ({ onSuccess }) => {
     resolver: customRes,
   });
   const [amount, setAmount] = useState("");
-  const { currentUserId } = useContext(UserContext)!;
+  const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
   const { currentTheme, toggleTheme } = useContext(ThemeContext);
 
   const handleFormSubmit: SubmitHandler<ChallengeFormValues> = useCallback(
@@ -64,6 +64,8 @@ export const ChallengeForm: React.FC<ChallengeFormProps> = ({ onSuccess }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           new_book_want: +state.bookNumber,
@@ -71,7 +73,7 @@ export const ChallengeForm: React.FC<ChallengeFormProps> = ({ onSuccess }) => {
         }),
       });
 
-      const data: { success: boolean } = await response.json();
+      const data: { success: boolean; message: string } = await response.json();
 
       if (data.success) {
         toast("Your goal is submitted! Thank you!", {
@@ -81,10 +83,20 @@ export const ChallengeForm: React.FC<ChallengeFormProps> = ({ onSuccess }) => {
           type: "success",
         });
 
+        if (!data.success && data.message) {
+          toast(data.message, {
+            autoClose: 2000,
+            transition: Bounce,
+            closeOnClick: true,
+            type: "error",
+          });
+
+          return;
+        }
         onSuccess(state.bookNumber);
       }
     },
-    [formState.isValid, onSuccess, currentUserId]
+    [formState.isValid, onSuccess, currentUserId, accessToken, refreshToken]
   );
   const challengeThemeClassName = useMemo(() => {
     return "challenge-" + currentTheme;

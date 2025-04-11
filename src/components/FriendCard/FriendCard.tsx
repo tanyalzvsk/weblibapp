@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  FC,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { FC, useCallback, useContext, useMemo, useState } from "react";
 import style from "./FriendCard.module.css";
 import { IUser } from "@/types";
 import { Poppins } from "@/fonts";
@@ -21,6 +15,7 @@ import { API_URL, BASE_API_URL } from "@/constants";
 import { useRouter } from "next/navigation";
 
 import { Avatar } from "antd";
+import { toast, Bounce } from "react-toastify";
 
 export interface FriendCardProps extends IUser {
   isFriend?: boolean;
@@ -43,7 +38,7 @@ export const FriendCard: FC<FriendCardProps> = ({
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { currentUserId } = useContext(UserContext)!;
+  const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
 
   const { currentTheme } = useContext(ThemeContext);
 
@@ -59,6 +54,8 @@ export const FriendCard: FC<FriendCardProps> = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           user_id: id,
@@ -66,15 +63,27 @@ export const FriendCard: FC<FriendCardProps> = ({
         }),
       });
 
-      const friendsData: { success: boolean } = await addFriendRes.json();
+      const friendsData: { success: boolean; message: string } =
+        await addFriendRes.json();
 
       if (friendsData.success) {
         onSuccess(friend_id, "add");
       }
 
+      if (!friendsData.success && friendsData.message) {
+        toast(friendsData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
+      }
+
       console.log("Add Friend? ", friendsData.success);
     },
-    [onSuccess]
+    [onSuccess, accessToken, refreshToken]
   );
 
   const removeFriendReq = useCallback(
@@ -83,6 +92,8 @@ export const FriendCard: FC<FriendCardProps> = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           user_id: id,
@@ -90,15 +101,25 @@ export const FriendCard: FC<FriendCardProps> = ({
         }),
       });
 
-      const friendsData: { success: boolean } = await removeFriendRes.json();
+      const friendsData: { success: boolean; message: string } = await removeFriendRes.json();
 
       if (friendsData.success) {
         onSuccess(friend_id, "remove");
       }
 
+      if (!friendsData.success && friendsData.message) {
+        toast(friendsData.message, {
+          autoClose: 2000,
+          transition: Bounce,
+          closeOnClick: true,
+          type: "error",
+        });
+
+        return;
+      }
       console.log("remove Friend? ", friendsData.success);
     },
-    [onSuccess]
+    [onSuccess, accessToken, refreshToken]
   );
 
   const addFriend = useCallback(
@@ -148,7 +169,6 @@ export const FriendCard: FC<FriendCardProps> = ({
     return "addFriendButton-" + currentTheme;
   }, [currentTheme]);
 
-
   return (
     <div
       className={classNames(style.card, {
@@ -181,7 +201,11 @@ export const FriendCard: FC<FriendCardProps> = ({
               event.stopPropagation();
               deleteFriend(id);
             }}
-            className={classNames(style.deleteFriendButton, style[deleteFriendThemeClassName], Poppins.className)}
+            className={classNames(
+              style.deleteFriendButton,
+              style[deleteFriendThemeClassName],
+              Poppins.className
+            )}
           >
             Delete
           </button>
@@ -193,7 +217,11 @@ export const FriendCard: FC<FriendCardProps> = ({
               event.stopPropagation();
               addFriend(id);
             }}
-            className={classNames(style.addFriendButton, style[addFriendThemeClassName], Poppins.className)}
+            className={classNames(
+              style.addFriendButton,
+              style[addFriendThemeClassName],
+              Poppins.className
+            )}
           >
             Add
           </button>

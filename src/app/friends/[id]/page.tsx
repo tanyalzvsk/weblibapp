@@ -54,11 +54,12 @@ export default function CollectionPage() {
       body: JSON.stringify(`${params.id}`),
     });
 
-    const userData: { success: boolean; message: string; user: IUser } =
+    const userData: { success: boolean; message: string } | IUser =
       await userResponse.json();
 
     console.log("user", userData);
-    if (!userData.success && userData.message) {
+
+    if ("message" in userData && !userData.success && userData.message) {
       toast(userData.message, {
         autoClose: 2000,
         transition: Bounce,
@@ -66,9 +67,13 @@ export default function CollectionPage() {
         type: "error",
       });
 
+      console.log("closed");
       return;
     }
-    setUserFriend(userData.user);
+
+    if ("id" in userData) {
+      setUserFriend(userData);
+    }
   }, [params.id, accessToken, refreshToken]);
 
   const loadIsFriendData = useCallback(
@@ -352,8 +357,11 @@ export default function CollectionPage() {
       }),
     });
 
-    const friendsData: { success: boolean; message: string; friendsList?: IUser[] } =
-      await friendsResponse.json();
+    const friendsData: {
+      success: boolean;
+      message: string;
+      friendsList?: IUser[];
+    } = await friendsResponse.json();
 
     console.log("Friends", friendsData.friendsList);
 
@@ -399,8 +407,11 @@ export default function CollectionPage() {
       }),
     });
 
-    const collectionsData: { success: boolean; message: string; collections: ICollection[] } =
-      await collectionsResponse.json();
+    const collectionsData: {
+      success: boolean;
+      message: string;
+      collections: ICollection[];
+    } = await collectionsResponse.json();
 
     const userColls = collectionsData.collections.filter(
       (collection) => collection.author === user?.name
@@ -536,15 +547,16 @@ export default function CollectionPage() {
                     fontSize: "18px",
                   }}
                 >
-                  reviews
+                  read
                 </span>
               ),
 
               children: (
                 <Flex gap={20} wrap>
-                  {books.map((item) => (
-                    <BookCard key={item.book_id} {...item} />
-                  ))}
+                  {books.length > 0 &&
+                    books.map((item) => (
+                      <BookCard key={item.book_id} {...item} />
+                    ))}
                 </Flex>
               ),
             },
@@ -563,9 +575,10 @@ export default function CollectionPage() {
               ),
               children: (
                 <Flex gap={20}>
-                  {books.map((item) => (
-                    <BookCard key={item.book_id} {...item} />
-                  ))}
+                  {books.length > 0 &&
+                    books.map((item) => (
+                      <BookCard key={item.book_id} {...item} />
+                    ))}
                 </Flex>
               ),
             },
@@ -587,47 +600,48 @@ export default function CollectionPage() {
 
               children: (
                 <Flex gap={20}>
-                  {books
-                    .sort((a, b) => {
-                      if (a.date && b.date) {
-                        const dateA = new Date(a.date);
-                        const dateB = new Date(b.date);
+                  {books.length > 0 &&
+                    books
+                      .sort((a, b) => {
+                        if (a.date && b.date) {
+                          const dateA = new Date(a.date);
+                          const dateB = new Date(b.date);
 
-                        return dateA.getTime() - dateB.getTime();
-                      }
+                          return dateA.getTime() - dateB.getTime();
+                        }
 
-                      return 0;
-                    })
-                    .map((book) => {
-                      if (!book.date) {
-                        return;
-                      }
-                      const month = +book.date.substr(5, 2);
-                      if (currentMonth !== month) {
-                        currentMonth = month;
-                        return (
-                          <div
-                            key={month}
-                            className={style.monthAndBooksContainer}
-                          >
-                            <h1
-                              className={classNames(
-                                style.monthTitle,
-
-                                Poppins.className
-                              )}
+                        return 0;
+                      })
+                      .map((book) => {
+                        if (!book.date) {
+                          return;
+                        }
+                        const month = +book.date.substr(5, 2);
+                        if (currentMonth !== month) {
+                          currentMonth = month;
+                          return (
+                            <div
+                              key={month}
+                              className={style.monthAndBooksContainer}
                             >
-                              {" "}
-                              {getMonthName(month)}
-                            </h1>
-                            <div className={style.booksContainer}>
-                              <BookCard key={book.book_id} {...book} />{" "}
+                              <h1
+                                className={classNames(
+                                  style.monthTitle,
+
+                                  Poppins.className
+                                )}
+                              >
+                                {" "}
+                                {getMonthName(month)}
+                              </h1>
+                              <div className={style.booksContainer}>
+                                <BookCard key={book.book_id} {...book} />{" "}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      }
-                      return <BookCard key={book.book_id} {...book} />;
-                    })}
+                          );
+                        }
+                        return <BookCard key={book.book_id} {...book} />;
+                      })}
                 </Flex>
               ),
             },

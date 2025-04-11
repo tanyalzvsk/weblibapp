@@ -9,7 +9,7 @@ import {
   SubmitHandler,
   useForm,
 } from "react-hook-form";
-import { API_URL} from "@/constants";
+import { API_URL } from "@/constants";
 import { Bounce, toast } from "react-toastify";
 import { UserContext, ThemeContext } from "@/utils";
 
@@ -27,7 +27,6 @@ type ReviewFormValues = {
 const customRes: Resolver<ReviewFormValues> = async (values) => {
   const result: ResolverError<ReviewFormValues> = { errors: {}, values };
 
-  // Perform custom validation logic
   if (!values.review) {
     result.errors.review = {
       type: "required",
@@ -52,10 +51,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
   });
 
   const [title, setTitle] = useState("");
-  const [rate, setRate] = useState<Rating>(1);
+  const [rate, setRate] = useState<Rating | number>(1);
   const [text, setText] = useState("");
 
-  const { currentUserId } = useContext(UserContext)!;
+  const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
 
   const handleFormSubmit: SubmitHandler<ReviewFormValues> = useCallback(
     async ({ review, reviewTitle }) => {
@@ -71,11 +70,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
         return;
       }
 
-      //pass other info to this! (uncommecnt sections below)
       const response = await fetch(`${API_URL}/review/write`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          LibAuthentication: accessToken || "",
+          LibRefreshAuthentication: refreshToken || "",
         },
         body: JSON.stringify({
           book_id: 2,
@@ -86,8 +86,11 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
         }),
       });
 
-      const data: { success: boolean; userId: number | undefined } =
-        await response.json();
+      const data: {
+        success: boolean;
+        message: string;
+        userId: number | undefined;
+      } = await response.json();
 
       console.log("me data", data);
 
@@ -98,13 +101,30 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
           closeOnClick: true,
           type: "success",
         });
+        
+        if (!data.success && data.message) {
+          toast(data.message, {
+            autoClose: 2000,
+            transition: Bounce,
+            closeOnClick: true,
+            type: "error",
+          });
 
+          return;
+        }
         if (onSuccess) {
           onSuccess();
         }
       }
     },
-    [formState.isValid, onSuccess, rate, currentUserId]
+    [
+      formState.isValid,
+      onSuccess,
+      rate,
+      currentUserId,
+      accessToken,
+      refreshToken,
+    ]
   );
   const reviewThemeClassName = useMemo(() => {
     return "review-" + currentTheme;
@@ -113,10 +133,15 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
     return "formTitle-" + currentTheme;
   }, [currentTheme]);
 
-
   return (
     <div className={classNames(style.review, style[reviewThemeClassName])}>
-      <div className={classNames(style.formTitle, style.titleOfForm, style[titleThemeClassName])}>
+      <div
+        className={classNames(
+          style.formTitle,
+          style.titleOfForm,
+          style[titleThemeClassName]
+        )}
+      >
         <h2 className={classNames(style.formHeaders, Poppins.className)}>
           Your review
         </h2>
@@ -145,7 +170,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
               </h2>
 
               <BookRate
-                onRateChange={(rate: Rating) => {
+                onRateChange={(rate: number) => {
                   setRate(rate);
                 }}
               />

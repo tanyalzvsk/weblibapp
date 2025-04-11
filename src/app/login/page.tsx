@@ -42,10 +42,7 @@ const resolver: Resolver<LoginValues> = async (values) => {
 
 export default function Login() {
   const router = useRouter();
-
   const { updateUserId, setAccess, setRefresh } = useContext(UserContext)!;
-
-  const { currentTheme, toggleTheme } = useContext(ThemeContext);
   const [quote, setQuote] = useState("");
 
   useEffect(() => {
@@ -56,12 +53,21 @@ export default function Login() {
     }
 
     const item = window.localStorage.getItem("user_id");
+    const access_token_item = window.localStorage.getItem("access_token");
+    const refresh_token_item = window.localStorage.getItem("refresh_token");
 
-    if (item !== null) {
+    if (
+      item !== null &&
+      access_token_item !== null &&
+      refresh_token_item !== null
+    ) {
       updateUserId(+item);
+      setAccess(access_token_item);
+      setRefresh(refresh_token_item);
+
       router.replace(Pages.main);
     }
-  }, [router, updateUserId]);
+  }, [router, setAccess, setRefresh, updateUserId]);
 
   const { handleSubmit, formState, control } = useForm<LoginValues>({
     resolver,

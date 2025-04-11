@@ -16,7 +16,7 @@ import { API_URL, reviews } from "@/constants";
 
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { IBook, ICollection } from "@/types";
-import { UserContext, useAuthCheck } from "@/utils";
+import { UserContext, useApiResponseAssistant, useAuthCheck } from "@/utils";
 import { useRouter } from "next/navigation";
 import { ISearchData } from "@/types/SearchData";
 import { FriendCard } from "@/components/FriendCard";
@@ -29,6 +29,7 @@ export default function Home() {
   const [searchData, setSearchData] = useState<ISearchData>();
 
   const { currentUserId, accessToken, refreshToken } = useContext(UserContext)!;
+  const { apiResponseAssistant } = useApiResponseAssistant();
 
   const router = useRouter();
   const refreshTokenHandler = useTokenRefresh();
@@ -99,23 +100,7 @@ export default function Home() {
       console.log("api response:", booksData);
 
       if (!booksData.success && booksData.message) {
-        if (booksData.message === "TOKEN_EXPIRED") {
-          toast("expired session. refreshing tokens", {
-            autoClose: 2000,
-            type: "info",
-          });
-
-          return "REPEAT";
-        }
-
-        toast(booksData.message, {
-          autoClose: 2000,
-          transition: Bounce,
-          closeOnClick: true,
-          type: "error",
-        });
-
-        return;
+        return apiResponseAssistant(booksData.message);
       }
 
       if (Array.isArray(booksData)) {
@@ -143,6 +128,7 @@ export default function Home() {
       accessToken,
       refreshToken,
       currentUserId,
+      apiResponseAssistant,
       loadCollections,
       refreshTokenHandler,
     ]
@@ -161,8 +147,9 @@ export default function Home() {
   }, [currentUserId, loadBooks, refreshTokenHandler]);
 
   useEffect(() => {
+    if (!accessToken) return;
     loadBooksWithRefresh();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, currentUserId]);
 
   const isSearch: boolean = useMemo(() => {
@@ -177,6 +164,7 @@ export default function Home() {
     if (searchData && searchData.book_by_author.length > 0) {
       return true;
     }
+
     return false;
   }, [searchData]);
 
